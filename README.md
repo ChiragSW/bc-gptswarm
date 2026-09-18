@@ -57,6 +57,10 @@ Generate the Phase 8 summaries, tables, and vector figures:
 
     python scripts/generate_study_artifacts.py
 
+Generate the Phase 9 statistical analysis and paper table:
+
+    python scripts/generate_statistical_analysis.py
+
 Compile the paper:
 
     cd paper

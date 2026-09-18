@@ -1,0 +1,21 @@
+\begin{table*}[t]
+\centering
+\caption{Phase 9 focal statistical analysis. Effects are BC-GPTSwarm minus the original baseline; seed-level intervals are Student-$t$ intervals with two degrees of freedom.}
+\label{tab:statistical-results}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lclrr}
+\hline
+Outcome & Unit ($n$) & Effect & 95\% CI & Exact $p$ \\
+\hline
+Accuracy & seed (3) & -1.39 pp & [-13.34, +10.56] & 1.000 \\
+Tokens/question & seed (3) & -14.4 tokens/q & [-236.7, +207.8] & 0.750 \\
+Latency/run & seed (3) & -1.41 s/run & [-27.78, +24.95] & 0.750 \\
+Budget violation vs. zero & seed (3) & +4.05\% & [-28.52, +36.62] & 0.750 \\
+Accuracy (item-level) & seed--question (72) & -1.39 pp & [-5.56, +2.78] & 1.000 \\
+\hline
+\end{tabular}
+\begin{minipage}{0.96\textwidth}\footnotesize
+Seed-level $p$-values enumerate all $2^3$ paired sign flips; their minimum possible two-sided value is 0.25. The item-level row uses exact McNemar testing, while its interval is a fixed-seed question-cluster bootstrap and is secondary because questions repeat across three learned policies.
+\end{minipage}
+\end{table*}

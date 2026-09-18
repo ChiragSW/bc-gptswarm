@@ -1,0 +1,15 @@
+{
+  "bootstrap_iterations": 20000,
+  "bootstrap_seed": 20260918,
+  "focal_contrast": "bc_budget_075 minus original_accuracy",
+  "independent_seed_pairs": 3,
+  "mcnemar": {
+    "discordant": 5,
+    "matched_odds_ratio": 0.6666666666666666,
+    "odds_ratio_ci_high": 5.819756578960806,
+    "odds_ratio_ci_low": 0.05568188900721291,
+    "p_value": 1.0
+  },
+  "minimum_two_sided_sign_flip_p": 0.25,
+  "multiplicity": "No confirmatory family was preregistered; ablation tests were not performed."
+}
