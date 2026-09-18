@@ -8,11 +8,11 @@ The graph contains one truthful and one adversarial input--output agent (1T1A) a
 
 \subsection{Comparators and Budgets}
 
-Phase 4 compares direct answer, full connectivity, random connectivity with edge probability 0.5, and accuracy-only optimized GPTSwarm. The later proposed-method comparison will add fixed token penalty and BC-GPTSwarm conditions at multiple feasible budgets. Candidate budget ratios remain 0.50, 0.75, and 1.00 of a named reference execution, subject to smoke-test feasibility; they do not affect the baseline runs.
+Phase 4 compares direct answer, full connectivity, random connectivity with edge probability 0.5, and accuracy-only optimized GPTSwarm. Phase 6 compares publication-style accuracy-only optimization, a feasibility-matched accuracy control, a fixed token penalty of 0.25, and BC-GPTSwarm at ratios 0.50, 0.75, and 1.00 of the Phase 4 full-graph mean of 303.3 tokens per question. Each operational target is at least 105\% of the measured truthful direct-path mean. The new direct floor is 171.8 tokens, so the low target becomes 180.4 rather than 151.6 tokens.
 
 \subsection{Metrics and Ablations}
 
-Primary metrics are MMLU accuracy, mean total tokens, normalized violation $\mathrm{E}[C/B-1]$, absolute budget error, and compliance rate. Secondary metrics are input/output tokens, estimated dollar cost, latency, active nodes and edges, optimization time, and stability across seeds. Planned ablations compare a learned dual variable with a fixed penalty, measured-token cost with edge-count cost, budget levels, dual learning rates, graph scales, and centered versus raw utility.
+Primary metrics are MMLU accuracy, mean total tokens, normalized violation $\mathrm{E}[C/B-1]$, absolute budget error, and compliance rate. Secondary metrics are input/output tokens, estimated dollar cost, latency, active nodes and edges, optimization time, and stability across seeds. The completed ablations compare the learned dual variable with a fixed penalty, budget levels, dual learning rates, graph scales, and centered versus raw utility.
 
 \subsection{Reproducibility Controls}
 
@@ -23,3 +23,7 @@ This local model is not numerically comparable to the original GPT-4 Turbo-era e
 \subsection{Phase 5 Software Sanity Tier}
 
 Before real-model comparisons, the constrained optimizer is exercised with the deterministic mock provider on five development and five held-out examples. The software-only configuration uses 50 iterations, batch size 16, primal rate 0.1, dual rate 0.2, and initial dual value 1.0. The measured mean direct-path floor is 75.8 tokens and the smoke budget is 130 tokens per example. These settings were selected to expose gradient and constraint failures cheaply; they are not Phase 6 research hyperparameters, and mock accuracy is not interpreted.
+
+\subsection{Phase 6--7 Controlled Protocol}
+
+All real-model conditions use seeds 11, 22, and 33, 12 optimization iterations, batch size four, primal rate 0.1, and the same frozen data and model settings as Phase 4. BC-GPTSwarm uses dual rate 0.2 and initial dual value zero. Condition order rotates by seed. Phase 7 changes one factor at a time at the middle budget: raw utility, dual rates 0.05 and 0.50, or a 2T2A graph with 16 candidate edges. The analysis retains every run and reports sample standard deviations and exploratory 95\% Student-$t$ intervals.

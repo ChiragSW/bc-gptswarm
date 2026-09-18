@@ -2,27 +2,68 @@
 
 \subsection{Implementation Validation}
 
-Ten offline tests pass. The six baseline tests cover deterministic edge order, stochastic DAG validity, all four baseline conditions, answer parsing, dataset loading, and finite accuracy-only gradients. Four constrained-method tests cover feasible conditional sampling, acyclicity, deterministic threshold repair, dual projection, finite gradients, and cost-sensitive policy behavior. Both deterministic-mock and local-Ollama baseline smoke tiers also complete. Disconnected baseline random graphs remain logged as failures rather than being removed after observing outcomes.
-
-The Phase 5 deterministic constrained smoke run records no invalid graph or provider failure. Its seeded frozen-policy evaluation averages 117.6 tokens against a 130-token expected budget, giving normalized violation $-0.095$; three of five individual executions are at or below the target. The dual variable moves from 1.0 to 0.0 as sampled batch cost falls below budget. Final truthful-to-decision and adversarial-to-decision probabilities are 0.864 and 0.052. The mock accuracy of 0.200 is not a research result. This run validates telemetry, feasibility, primal and dual updates, and serialization only.
+Eleven offline tests pass: six baseline tests, four constrained-method tests, and one controlled-objective test. They cover deterministic edge order, stochastic DAG validity, answer parsing, dataset loading, finite gradients, feasible conditional sampling, threshold repair, dual projection, cost-sensitive policy behavior, and fixed-dual controls. Deterministic-mock and local-Ollama smoke tiers complete without structural failures. The Phase 5 mock smoke averages 117.6 tokens against its 130-token expected budget, but remains software validation rather than research evidence.
 
 \subsection{Baseline Reproduction}
 
 \input{tables/baseline_results}
 
-Table~\ref{tab:baseline-results} reports the complete predeclared 4-by-3 matrix. Accuracy-only optimization does not improve average accuracy over random connectivity: both reach 0.250. Full connectivity reaches 0.264, and direct answer reaches 0.167. The optimized-minus-random difference by seed is $+0.042$, $+0.083$, and $-0.125$, so its sign is not stable. With only three seeds and 24 questions, we do not perform or imply a significance test.
+Table~\ref{tab:baseline-results} records the Phase 4 publication-style baseline. Accuracy-only optimized and random graphs both average 0.250 accuracy. Full connectivity reaches 0.264 and direct answer 0.167. Optimized graphs use 6,027 tokens over 24 questions, 17.2\% fewer than full graphs, but 35.0\% more than random graphs. Random sampling averages 4.7 disconnected failures, making some apparent efficiency a failure artifact.
 
-Optimized graphs use 6,027 tokens on average, 17.2\% fewer than full graphs (7,279), but 35.0\% more than random graphs (4,465). Random sampling averages 4.7 failed questions because some graphs have no valid decision input; optimized thresholded graphs have no such failures. The apparent random efficiency is therefore partly a failure artifact.
+\subsection{Controlled Main Comparison}
+
+\input{tables/main_results}
+
+Table~\ref{tab:main-results} reports all 18 Phase 6 runs. The original accuracy-only baseline has the highest main-study mean accuracy, 0.250. Middle-budget BC-GPTSwarm reaches 0.236, a difference of $-0.014$, while using 236.7 versus 251.1 tokens per question, a 5.8\% reduction. Its normalized budget violation is nevertheless $+0.040$. This is a small descriptive tradeoff, not an accuracy improvement.
+
+The low target is raised by the predeclared feasibility floor from 151.6 to 180.4 tokens, yet BC-GPTSwarm still exceeds it by 28.8\% on average. The high-budget condition averages 238.9 tokens against 303.3 and is the only constrained setting with clear aggregate slack. Per-query compliance increases from 0.38 to 0.50 to 0.75 as the target increases. Feasible accuracy-only and fixed-penalty controls average 0.222 and 0.208 accuracy. All system and graph failure counts are zero.
 
 \begin{figure}[t]
     \centering
-    \includegraphics[width=\columnwidth]{../results/figures/baseline_accuracy_tokens.pdf}
-    \caption{Observed accuracy and total-token operating points. Error bars show standard deviation over three graph seeds.}
-    \label{fig:baseline-accuracy-tokens}
+    \includegraphics[width=\columnwidth]{../results/figures/main_accuracy_tokens.pdf}
+    \caption{Accuracy--token operating points for the controlled comparison. Error bars are sample standard deviations over three seeds.}
+    \label{fig:main-accuracy-tokens}
 \end{figure}
 
-\subsection{Learned Connectivity}
+Accuracy standard deviations range from 0.083 to 0.110. Exploratory 95\% Student-$t$ intervals for original accuracy ($-0.024$, 0.524) and middle-budget BC-GPTSwarm ($-0.024$, 0.497) overlap almost completely. With three seeds and 24 questions, no significance claim is warranted.
 
-The final truthful-to-decision probability is 0.643, 0.640, and 0.655 for seeds 11, 22, and 33. The adversarial-to-decision probability is 0.624, 0.663, and 0.405; it falls below the 0.5 selection threshold only for seed 33. The corresponding 48 optimization executions contain 12, 13, and 9 positive rewards. Thus useful decision edges receive consistently higher probability, but adversarial suppression is not stable.
+\subsection{Budget and Mechanism Ablations}
 
-No controlled proposed-method experiment with the local language model has been run. Results pending proposed-method experiment.
+\input{tables/ablation_results}
+
+Table~\ref{tab:ablation-results} reports Phase 7 ablations. Raw rather than centered utility reaches 0.250 accuracy and 232.4 tokens, versus 0.236 and 236.7 for centered utility, but its accuracy standard deviation is 0.150. Dual rates 0.05, 0.20, and 0.50 produce mean accuracy 0.222, 0.236, and 0.222 and normalized violation $+0.027$, $+0.040$, and $+0.009$. No rate has a stable accuracy advantage.
+
+The 2T2A graph reaches 0.278 accuracy versus 0.236 for 1T1A, but uses 419.5 rather than 236.7 tokens and violates the middle target by 84.4\%. More agents therefore buy a small mean accuracy increase without resource control.
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=0.82\textwidth]{../results/figures/budget_response.pdf}
+    \caption{Budget response of BC-GPTSwarm. Observed cost changes only modestly across targets, and accuracy peaks at the middle setting.}
+    \label{fig:budget-response}
+\end{figure*}
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=0.74\textwidth]{../results/figures/graph_scale.pdf}
+    \caption{Agent-count ablation. The 2T2A graph increases both mean accuracy and token use, with substantial budget violation.}
+    \label{fig:graph-scale}
+\end{figure*}
+
+\subsection{Optimization Stability}
+
+Final mean dual values for budget ratios 0.50, 0.75, and 1.00 are 1.129, 0.427, and 0.005. This ordering is mechanically correct: tighter budgets create larger penalties. However, final training-batch cost ratios remain 1.506, 1.321, and 0.950. The fixed 12-iteration allowance is adequate only for the high target and does not establish tight-budget convergence.
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=0.82\textwidth]{../results/figures/optimization_stability.pdf}
+    \caption{Mean normalized training-batch cost and dual trajectory over three seeds. The dashed line is the expected-budget boundary.}
+    \label{fig:optimization-stability}
+\end{figure*}
+
+Across all 30 main and ablation runs, active-agent count correlates 0.424 with accuracy, active-edge count 0.224, tokens 0.420, and latency 0.287. These run-level Pearson correlations are descriptive and strongly influenced by the 2T2A condition. The descriptive mean-point Pareto set contains the high-dual, raw-utility, and 2T2A variants; their uncertainty prevents ranking them as statistically distinct systems.
+
+\subsection{Paired Outcomes and Failures}
+
+Pairing original accuracy-only and middle-budget BC-GPTSwarm by seed and question gives 72 comparisons: both are correct in 15, both are wrong in 52, the baseline alone is correct in three, and BC-GPTSwarm alone is correct in two. The five disagreements span high-school computer science, global facts, high-school microeconomics, and electrical engineering. In the electrical-engineering baseline-only win, BC-GPTSwarm uses 306 tokens versus 148 for the baseline, showing that extra calls can hurt both cost and correctness.
+
+There are no provider errors, unparseable final answers, or disconnected graphs in Phases 6--7. The dominant failure mode is ordinary task error from the small local model. Feasibility conditioning removes structural failures but does not fix weak reasoning.
