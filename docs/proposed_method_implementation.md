@@ -39,10 +39,11 @@ closed form
 
 The training log-probability is `log p(G) - log P(F)`. Including the normalizer
 correction makes the score function correspond to the conditional policy rather
-than the unconditioned Bernoulli policy. At evaluation time, thresholding is
-used as in the baseline. If thresholding removes every decision edge, the
-highest-probability decision edge is selected and the intervention is logged in
-the graph mask.
+than the unconditioned Bernoulli policy. Expected-budget evaluation draws one
+feasible graph per held-out example from the frozen conditional policy using a
+recorded seed. This measures the distribution named in the objective. A separate
+thresholding helper is retained for deterministic deployment; if thresholding
+removes every decision edge, it selects the highest-probability decision edge.
 
 ## Configuration and telemetry
 
@@ -53,7 +54,7 @@ the graph mask.
 - initial non-negative dual value;
 - batch size and iteration count;
 - centered-versus-raw utility switch;
-- feasibility rule and probability threshold.
+- feasibility rule and optional deployment threshold.
 
 The proposed runner first measures the mean truthful direct-path cost on the
 optimization split. A budget below this floor is rejected before optimization.

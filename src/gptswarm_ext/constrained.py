@@ -156,17 +156,21 @@ def evaluate_feasible_policy(
     provider: BaseProvider,
     agent_ids: list[str],
     seed: int,
-    threshold: float,
-) -> tuple[list[EvaluationTrace], GraphSample]:
-    sample = distribution.from_probabilities_feasible(threshold)
-    traces = [
-        execute_graph(
-            sample,
-            example,
-            provider,
-            agent_ids,
-            vote_seed=seed * 100_000 + index,
+) -> tuple[list[EvaluationTrace], list[GraphSample]]:
+    """Evaluate deterministic-by-seed draws from the frozen feasible policy."""
+    generator = torch.Generator().manual_seed(seed)
+    samples: list[GraphSample] = []
+    traces: list[EvaluationTrace] = []
+    for index, example in enumerate(examples):
+        sample = distribution.sample_feasible(generator)
+        samples.append(sample)
+        traces.append(
+            execute_graph(
+                sample,
+                example,
+                provider,
+                agent_ids,
+                vote_seed=seed * 100_000 + index,
+            )
         )
-        for index, example in enumerate(examples)
-    ]
-    return traces, sample
+    return traces, samples

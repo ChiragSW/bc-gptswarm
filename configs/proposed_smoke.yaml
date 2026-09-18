@@ -22,15 +22,15 @@ graph:
   initial_probability: 0.5
   threshold: 0.5
 optimization:
-  iterations: 20
-  batch_size: 4
+  iterations: 50
+  batch_size: 16
   primal_learning_rate: 0.1
   dual_learning_rate: 0.2
-  initial_dual_value: 0.0
+  initial_dual_value: 1.0
   center_utility: true
 constraint:
   resource: total_tokens
-  budget_tokens: 110.0
+  budget_tokens: 130.0
   feasibility_rule: at_least_one_decision_input
 output:
   raw_dir: results/raw

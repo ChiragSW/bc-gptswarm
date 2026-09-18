@@ -53,7 +53,7 @@ PROPOSED_RESULT_COLUMNS = [
     "failure_count",
     "dual_final",
     "edge_probabilities",
-    "selected_edges",
+    "evaluation_edges",
     "raw_trace_path",
 ]
 
@@ -116,13 +116,12 @@ def run(config_path: str | Path) -> list[dict[str, Any]]:
             ),
             center_utility=bool(optimization_config.get("center_utility", True)),
         )
-        traces, selected_graph = evaluate_feasible_policy(
+        traces, evaluation_graphs = evaluate_feasible_policy(
             distribution=distribution,
             examples=validation_examples,
             provider=provider,
             agent_ids=agent_ids,
             seed=seed,
-            threshold=float(graph_config["threshold"]),
         )
         summary = summarize_traces(traces)
         mean_tokens = float(np.mean([trace.total_tokens for trace in traces]))
@@ -155,6 +154,10 @@ def run(config_path: str | Path) -> list[dict[str, Any]]:
             "optimization": optimization_config,
             "constraint": config["constraint"],
             "measured_direct_cost_floor": direct_cost_floor,
+            "evaluation_rule": (
+                "one deterministic-by-seed draw per held-out example from the "
+                "frozen feasible policy"
+            ),
             "prompts": PROMPT_SPEC,
         }
         raw_records = [manifest]
@@ -191,7 +194,9 @@ def run(config_path: str | Path) -> list[dict[str, Any]]:
             "failure_count": int(summary["failure_count"]),
             "dual_final": state.dual_value,
             "edge_probabilities": json.dumps(probabilities),
-            "selected_edges": json.dumps(selected_graph.edges),
+            "evaluation_edges": json.dumps(
+                [sample.edges for sample in evaluation_graphs]
+            ),
             "raw_trace_path": str(raw_path.relative_to(project_path("."))),
         }
         results.append(result)
