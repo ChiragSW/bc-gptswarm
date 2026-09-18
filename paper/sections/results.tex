@@ -1,7 +1,26 @@
 \section{Results}
 
-\subsection{Phase 3 Implementation Validation}
+\subsection{Implementation Validation}
 
 Six offline tests passed, covering deterministic edge order, stochastic DAG validity, all four baseline conditions, answer parsing, dataset loading, and finite optimizer gradients. Both deterministic-mock and local-Ollama five-example smoke tiers completed. Disconnected random graphs were retained and counted as failures. In the local smoke run the optimized policy received no positive utility and its thresholded graph had no valid decision input; this behavior is logged rather than repaired after observing outcomes. Smoke-tier scores validate software only and are excluded from the research comparison.
 
-The Phase 4 baseline experiment is currently in progress. No proposed-method experiment has been run. Results pending experiment.
+\subsection{Baseline Reproduction}
+
+\input{tables/baseline_results}
+
+Table~\ref{tab:baseline-results} reports the complete predeclared 4-by-3 matrix. Accuracy-only optimization does not improve average accuracy over random connectivity: both reach 0.250. Full connectivity reaches 0.264, and direct answer reaches 0.167. The optimized-minus-random difference by seed is $+0.042$, $+0.083$, and $-0.125$, so its sign is not stable. With only three seeds and 24 questions, we do not perform or imply a significance test.
+
+Optimized graphs use 6,027 tokens on average, 17.2\% fewer than full graphs (7,279), but 35.0\% more than random graphs (4,465). Random sampling averages 4.7 failed questions because some graphs have no valid decision input; optimized thresholded graphs have no such failures. The apparent random efficiency is therefore partly a failure artifact.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\columnwidth]{../results/figures/baseline_accuracy_tokens.pdf}
+    \caption{Observed accuracy and total-token operating points. Error bars show standard deviation over three graph seeds.}
+    \label{fig:baseline-accuracy-tokens}
+\end{figure}
+
+\subsection{Learned Connectivity}
+
+The final truthful-to-decision probability is 0.643, 0.640, and 0.655 for seeds 11, 22, and 33. The adversarial-to-decision probability is 0.624, 0.663, and 0.405; it falls below the 0.5 selection threshold only for seed 33. The corresponding 48 optimization executions contain 12, 13, and 9 positive rewards. Thus useful decision edges receive consistently higher probability, but adversarial suppression is not stable.
+
+No proposed-method experiment has been run. Results pending proposed-method experiment.
