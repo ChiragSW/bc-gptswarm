@@ -1,5 +1,27 @@
 \section{Proposed Methodology}
 
+\subsection{Planned System Architecture}
+
+Figure~\ref{fig:bcgptswarm-architecture} shows the proposed training path. The intervention sits after graph execution: the resource meter sums provider-reported input and output tokens while the task evaluator computes utility. Both signals update the edge policy, but only measured cost updates the dual variable. Node routines, prompts, the cycle-rejecting sampler, and the decision node remain baseline components.
+
+\begin{figure}[t]
+\centering
+\fbox{\begin{minipage}{0.90\columnwidth}
+\centering\small
+Input question $x$\\[2pt]
+$\downarrow$\\[-1pt]
+Feasible graph $G\sim D_{\theta}$\\[2pt]
+$\downarrow$\\[-1pt]
+Topological language-agent execution\\[2pt]
+$\swarrow\hspace{2.2cm}\searrow$\\[-1pt]
+Task utility $U$\hfill Token cost $C$\\[2pt]
+$\searrow\hspace{2.2cm}\swarrow$\\[-1pt]
+Primal edge update $\theta$; dual update $\lambda$
+\end{minipage}}
+\caption{Planned BC-GPTSwarm optimization architecture. The baseline execution path is retained; token measurement and the dual update are added.}
+\label{fig:bcgptswarm-architecture}
+\end{figure}
+
 \subsection{Budget-Constrained Objective}
 
 The reproduction retains GPTSwarm's accuracy-only edge objective as a baseline. BC-GPTSwarm preserves its edge distribution $D_{\theta}$ but constrains measured resource use. For input $x$, sampled feasible graph $G\sim D_{\theta}$, task utility $U(G,x)$, total-token cost $C(G,x)$, and target $B>0$, the proposed problem is
@@ -16,6 +38,13 @@ Using the normalized constraint $g=\mathrm{E}[C/B-1]\leq0$, its Lagrangian is
 \end{align}
 Normalization makes the dual scale comparable across budgets; it does not remove the need to predeclare optimizer settings.
 
+The fixed-penalty control instead uses
+\begin{equation}
+ \max_{\theta}\;\mathrm{E}_{x,G}\!\left[
+ U(G,x)-\alpha\frac{C(G,x)}{B_{\mathrm{ref}}}\right],
+\end{equation}
+where $\alpha$ is fixed before evaluation. Unlike BC-GPTSwarm, this scalarized objective has no mechanism that targets a requested constraint value.
+
 \subsection{Primal--Dual Update}
 
 For $M$ sampled executions, the planned edge-policy estimate is
@@ -31,6 +60,19 @@ where $A_i$ is a centered task-utility advantage. The dual variable follows proj
  \left(\frac{1}{M}\sum_{i=1}^{M}\frac{C_i}{B}-1\right)\right]_{+}.
 \end{equation}
 The primary cost $C$ is the sum of reported input and output tokens across model calls. Dollar cost and latency are recorded but excluded from the initial constraint to keep the intervention identifiable.
+
+\subsection{Planned Optimization Procedure}
+
+For each target budget and seed, the proposed procedure is:
+\begin{enumerate}
+    \item calibrate a valid cost floor and freeze $B$, model settings, prompts, and candidate edges;
+    \item sample $M$ feasible DAGs from $D_{\theta}$ for the current optimization batch;
+    \item execute every sampled graph, recording task utility and per-call token metadata;
+    \item compute the centered utility advantage and normalized budget violation;
+    \item update edge logits by the primal policy-gradient estimate and update $\lambda$ by projected dual descent; and
+    \item after the fixed optimization allowance, evaluate the frozen edge policy on held-out examples.
+\end{enumerate}
+The final implementation will expose the primal and dual learning rates, batch size, budget, feasibility rule, and random seed in configuration. A deterministic mock model will be used to check gradient signs before paid or nondeterministic inference.
 
 \subsection{Feasibility and Fairness}
 

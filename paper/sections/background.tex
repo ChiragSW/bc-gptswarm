@@ -10,6 +10,10 @@ where $N$ is a set of computational nodes, $E\subset N\times N$ is a directed ed
 
 A swarm combines several agent graphs. Their internal edges remain fixed in the reported edge experiments, while additional edges between agents determine communication and orchestration. A task-specific decision node aggregates terminal information, for example by majority vote.
 
+\subsection{Execution Architecture}
+
+At execution time, the framework receives a task input, samples or fixes a feasible communication graph, and invokes nodes in topological order. Each node receives the original input plus messages from active predecessors. The decision node maps the terminal messages to a task output, after which an external evaluator produces utility. Graph optimization changes future edge probabilities; it does not differentiate through the language-model calls. This separation between graph sampling, black-box execution, and task evaluation is the architectural boundary retained by BC-GPTSwarm.
+
 \subsection{Edge Optimization}
 
 Let $\mathcal{E}=\{e_i\}_{i=1}^{d}$ be potential edges and let $D_{\theta}$ be a distribution over feasible DAGs. GPTSwarm optimizes
