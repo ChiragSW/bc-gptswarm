@@ -19,3 +19,7 @@ Primary metrics are MMLU accuracy, mean total tokens, normalized violation $\mat
 The credential-free baseline uses \texttt{qwen2.5:0.5b} through Ollama 0.17.1 at temperature zero with a four-token output cap and model seed 20260918. It runs on Python 3.10.9 and CPU-only PyTorch 2.8.0 on a 16-logical-core Intel system with approximately 16.9~GB RAM. Experiment seeds are 11, 22, and 33. Phase 4 disables response caching because latency is measured. Every raw response, parsed answer, edge mask, token count, latency, failure, optimizer gradient, and learned probability is logged.
 
 This local model is not numerically comparable to the original GPT-4 Turbo-era endpoint. Results are therefore a controlled behavioral reproduction. The complete deviation log, pinned dependencies, prompts, configurations, and commands are versioned with the code. Conditions run in direct, full, random, then optimized order; local warm-up therefore prevents a fair cross-method latency claim.
+
+\subsection{Phase 5 Software Sanity Tier}
+
+Before real-model comparisons, the constrained optimizer is exercised with the deterministic mock provider on five development and five held-out examples. The software-only configuration uses 50 iterations, batch size 16, primal rate 0.1, dual rate 0.2, and initial dual value 1.0. The measured mean direct-path floor is 75.8 tokens and the smoke budget is 130 tokens per example. These settings were selected to expose gradient and constraint failures cheaply; they are not Phase 6 research hyperparameters, and mock accuracy is not interpreted.

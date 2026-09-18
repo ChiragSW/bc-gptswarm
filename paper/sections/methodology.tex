@@ -6,7 +6,7 @@ The executable baseline is a minimal compatibility layer for publication-era GPT
 
 The adapter adds provider-independent response objects, deterministic seeding, immutable dataset snapshots, and structured JSONL/CSV logging. These additions measure behavior but do not enter the baseline reward. Provider failures, unparseable answers, and graphs without valid decision input are retained and scored incorrect.
 
-\subsection{Planned System Architecture}
+\subsection{System Architecture}
 
 Figure~\ref{fig:bcgptswarm-architecture} shows the proposed training path. The intervention sits after graph execution: the resource meter sums provider-reported input and output tokens while the task evaluator computes utility. Both signals update the edge policy, but only measured cost updates the dual variable. Node routines, prompts, the cycle-rejecting sampler, and the decision node remain baseline components.
 
@@ -24,7 +24,7 @@ Task utility $U$\hfill Token cost $C$\\[2pt]
 $\searrow\hspace{2.2cm}\swarrow$\\[-1pt]
 Primal edge update $\theta$; dual update $\lambda$
 \end{minipage}}
-\caption{Planned BC-GPTSwarm optimization architecture. The baseline execution path is retained; token measurement and the dual update are added.}
+\caption{Implemented BC-GPTSwarm optimization architecture. The baseline execution path is retained; token measurement and the dual update are added.}
 \label{fig:bcgptswarm-architecture}
 \end{figure}
 
@@ -53,7 +53,7 @@ where $\alpha$ is fixed before evaluation. Unlike BC-GPTSwarm, this scalarized o
 
 \subsection{Primal--Dual Update}
 
-For $M$ sampled executions, the planned edge-policy estimate is
+For $M$ sampled executions, the implemented edge-policy estimate is
 \begin{equation}
  \widehat{\nabla_{\theta}\mathcal{L}}=
  \frac{1}{M}\sum_{i=1}^{M}
@@ -67,7 +67,18 @@ where $A_i$ is a centered task-utility advantage. The dual variable follows proj
 \end{equation}
 The primary cost $C$ is the sum of reported input and output tokens across model calls. Dollar cost and latency are recorded but excluded from the initial constraint to keep the intervention identifiable.
 
-\subsection{Planned Optimization Procedure}
+\subsection{Feasible Conditional Policy}
+
+A zero-call or disconnected graph can satisfy a token target without solving the task, so BC-GPTSwarm conditions the training policy on event $F$: at least one agent has an edge to the decision node. Let $E_D$ be those candidate edges. Because the decision node is a sink, these edges cannot introduce cycles, and
+\begin{align}
+ q_{\theta}=P_{\theta}(F)
+ &=1-\prod_{e\in E_D}(1-p_e),\\
+ \log p_{\theta}(G\mid F)
+ &=\log p_{\theta}(G)-\log q_{\theta}.
+\end{align}
+Training uses rejection sampling and the corrected conditional log probability above. Omitting $\log q_{\theta}$ would sample the conditional distribution but use the wrong score-function gradient. Held-out evaluation draws one feasible graph per example from the frozen conditional policy with a recorded seed. A thresholded feasible export is also available, but it is not used to estimate the expected constraint.
+
+\subsection{Optimization Procedure}
 
 For each target budget and seed, the proposed procedure is:
 \begin{enumerate}
@@ -78,8 +89,25 @@ For each target budget and seed, the proposed procedure is:
     \item update edge logits by the primal policy-gradient estimate and update $\lambda$ by projected dual descent; and
     \item after the fixed optimization allowance, evaluate the frozen edge policy on held-out examples.
 \end{enumerate}
-The final implementation will expose the primal and dual learning rates, batch size, budget, feasibility rule, and random seed in configuration. A deterministic mock model will be used to check gradient signs before paid or nondeterministic inference.
+The implementation exposes the primal and dual learning rates, batch size, budget, initial dual value, centered-utility switch, feasibility rule, and random seed in configuration. Algorithm~1 summarizes the executable update.
+
+\begin{center}
+\fbox{\begin{minipage}{0.91\columnwidth}
+\small
+\textbf{Algorithm 1: BC-GPTSwarm training}\par
+\textbf{Input:} policy $D_{\theta}$, budget $B$, rates $\eta_{\theta},\eta_{\lambda}$\par
+1. Measure the valid direct-path cost floor; reject $B$ below it.\par
+2. For each iteration, draw $M$ graphs from $D_{\theta}(\cdot\mid F)$.\par
+3. Execute each graph and record utility $U_i$ and tokens $C_i$.\par
+4. Set $A_i=U_i-\bar U$ and $s_i=A_i-\lambda(C_i/B-1)$.\par
+5. Apply Adam to $-M^{-1}\sum_i s_i\log p_{\theta}(G_i\mid F)$.\par
+6. Set $\lambda\leftarrow[\lambda+\eta_{\lambda}(\bar C/B-1)]_+$.\par
+7. Evaluate seeded draws from the frozen feasible policy.
+\end{minipage}}
+\end{center}
+
+With $E$ candidate edges, feasibility probability $q_{\theta}$, batch size $M$, and $I$ iterations, the current simple cycle checks give expected sampling cost $O(E^2/q_{\theta})$ per graph. Total optimization cost is $O(IM(E^2/q_{\theta}+T_{\mathrm{exec}}))$, where language-model execution $T_{\mathrm{exec}}$ dominates in practice; learned-parameter memory is $O(E)$.
 
 \subsection{Feasibility and Fairness}
 
-A disconnected or zero-call graph is not a valid budget solution. A smoke test will estimate the minimum cost of a valid direct-answer path; lower budgets will be declared infeasible. Every sampled graph must retain an input-to-decision path. This feasibility rule, the candidate edges, and the optimization-call allowance will be identical for accuracy-only, fixed-penalty, and constrained methods. No proposed method has yet been implemented, and all quantitative claims remain pending experiment.
+A disconnected or zero-call graph is not a valid budget solution. The runner measures the mean cost of a valid truthful direct-answer path on the optimization split and rejects lower budgets. Every proposed-method sample retains an input-to-decision path. Phase 6 will apply the same feasibility rule, candidate edges, and optimization-call allowance to accuracy-only, fixed-penalty, and constrained methods. The implementation is complete, but research claims remain pending controlled experiments.

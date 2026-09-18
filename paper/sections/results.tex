@@ -2,7 +2,9 @@
 
 \subsection{Implementation Validation}
 
-Six offline tests passed, covering deterministic edge order, stochastic DAG validity, all four baseline conditions, answer parsing, dataset loading, and finite optimizer gradients. Both deterministic-mock and local-Ollama five-example smoke tiers completed. Disconnected random graphs were retained and counted as failures. In the local smoke run the optimized policy received no positive utility and its thresholded graph had no valid decision input; this behavior is logged rather than repaired after observing outcomes. Smoke-tier scores validate software only and are excluded from the research comparison.
+Ten offline tests pass. The six baseline tests cover deterministic edge order, stochastic DAG validity, all four baseline conditions, answer parsing, dataset loading, and finite accuracy-only gradients. Four constrained-method tests cover feasible conditional sampling, acyclicity, deterministic threshold repair, dual projection, finite gradients, and cost-sensitive policy behavior. Both deterministic-mock and local-Ollama baseline smoke tiers also complete. Disconnected baseline random graphs remain logged as failures rather than being removed after observing outcomes.
+
+The Phase 5 deterministic constrained smoke run records no invalid graph or provider failure. Its seeded frozen-policy evaluation averages 117.6 tokens against a 130-token expected budget, giving normalized violation $-0.095$; three of five individual executions are at or below the target. The dual variable moves from 1.0 to 0.0 as sampled batch cost falls below budget. Final truthful-to-decision and adversarial-to-decision probabilities are 0.864 and 0.052. The mock accuracy of 0.200 is not a research result. This run validates telemetry, feasibility, primal and dual updates, and serialization only.
 
 \subsection{Baseline Reproduction}
 
@@ -23,4 +25,4 @@ Optimized graphs use 6,027 tokens on average, 17.2\% fewer than full graphs (7,2
 
 The final truthful-to-decision probability is 0.643, 0.640, and 0.655 for seeds 11, 22, and 33. The adversarial-to-decision probability is 0.624, 0.663, and 0.405; it falls below the 0.5 selection threshold only for seed 33. The corresponding 48 optimization executions contain 12, 13, and 9 positive rewards. Thus useful decision edges receive consistently higher probability, but adversarial suppression is not stable.
 
-No proposed-method experiment has been run. Results pending proposed-method experiment.
+No controlled proposed-method experiment with the local language model has been run. Results pending proposed-method experiment.
