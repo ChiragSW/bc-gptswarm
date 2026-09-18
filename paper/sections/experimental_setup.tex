@@ -2,13 +2,13 @@
 
 \subsection{Task and Scale}
 
-The minimum reproduction uses MMLU with truthful and adversarial input--output agents and a majority-vote decision node. The mandatory graph scale is one truthful and one adversarial agent (1T1A); three of each (3T3A) is preferred if calibration shows it is affordable. The publication-era repository revision is \texttt{1e1e5899d51bde690672417cf92aa4de7b210422}.
+The reproduction uses the \texttt{all} configuration of \texttt{cais/mmlu} at immutable revision \texttt{c30699e8356da336a370243923dbaf21066bb9fe}. Twenty-four subject-diverse development examples are used for optimization and 24 disjoint validation examples for evaluation. Subjects are ordered by a seeded SHA-256 rule, and committed JSONL snapshots record source indices, example identifiers, and file checksums.
 
-The original MMLU setting uses 200 optimizer iterations, four sampled graphs per iteration, Adam with learning rate 0.1, and 153 validation questions. We will first run a five-example smoke test, measure current API usage and the valid minimum cost, and then predeclare an affordable scale. Python, NumPy, and PyTorch seeds, model identifiers, prompts, raw responses, edge masks, token counts, latency, errors, cost, constraint violation, and dual trajectories will be logged.
+The graph contains one truthful and one adversarial input--output agent (1T1A) and a majority-vote decision node. The original setting uses 200 optimizer iterations, four sampled graphs per iteration, Adam with learning rate 0.1, and 153 validation questions. Our predeclared CPU-feasible baseline uses 12 iterations, batch size four, and the same learning rate. The preferred 3T3A confirmation is deferred because the local pilot is intended to validate the minimum graph.
 
 \subsection{Comparators and Budgets}
 
-The comparison includes direct answer, full connectivity, random connectivity with edge probability 0.5, accuracy-only GPTSwarm, GPTSwarm with a fixed token penalty, and BC-GPTSwarm at multiple feasible budgets. Candidate budget ratios are 0.50, 0.75, and 1.00 of a named reference execution, subject to smoke-test feasibility. Ratios and the reference will be frozen before main evaluation.
+Phase 4 compares direct answer, full connectivity, random connectivity with edge probability 0.5, and accuracy-only optimized GPTSwarm. The later proposed-method comparison will add fixed token penalty and BC-GPTSwarm conditions at multiple feasible budgets. Candidate budget ratios remain 0.50, 0.75, and 1.00 of a named reference execution, subject to smoke-test feasibility; they do not affect the baseline runs.
 
 \subsection{Metrics and Ablations}
 
@@ -16,4 +16,6 @@ Primary metrics are MMLU accuracy, mean total tokens, normalized violation $\mat
 
 \subsection{Reproducibility Controls}
 
-The 2024 model endpoints may not be available. Any replacement model will be pinned and described, and its results will be presented as a controlled behavioral reproduction rather than an exact numerical replication.
+The credential-free baseline uses \texttt{qwen2.5:0.5b} through Ollama 0.17.1 at temperature zero with a four-token output cap and model seed 20260918. It runs on Python 3.10.9 and CPU-only PyTorch 2.8.0 on a 16-logical-core Intel system with approximately 16.9~GB RAM. Experiment seeds are 11, 22, and 33. Phase 4 disables response caching because latency is measured. Every raw response, parsed answer, edge mask, token count, latency, failure, optimizer gradient, and learned probability is logged.
+
+This local model is not numerically comparable to the original GPT-4 Turbo-era endpoint. Results are therefore a controlled behavioral reproduction. The complete deviation log, pinned dependencies, prompts, configurations, and commands are versioned with the code.

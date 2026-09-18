@@ -1,3 +1,7 @@
 \section{Results}
 
-Experiments are currently in progress. No baseline or proposed-method experiment has been run. Results pending experiment.
+\subsection{Phase 3 Implementation Validation}
+
+Six offline tests passed, covering deterministic edge order, stochastic DAG validity, all four baseline conditions, answer parsing, dataset loading, and finite optimizer gradients. Both deterministic-mock and local-Ollama five-example smoke tiers completed. Disconnected random graphs were retained and counted as failures. In the local smoke run the optimized policy received no positive utility and its thresholded graph had no valid decision input; this behavior is logged rather than repaired after observing outcomes. Smoke-tier scores validate software only and are excluded from the research comparison.
+
+The Phase 4 baseline experiment is currently in progress. No proposed-method experiment has been run. Results pending experiment.

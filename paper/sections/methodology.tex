@@ -1,4 +1,10 @@
-\section{Proposed Methodology}
+\section{Methodology}
+
+\subsection{Baseline Adapter}
+
+The executable baseline is a minimal compatibility layer for publication-era GPTSwarm commit \texttt{1e1e5899d51bde690672417cf92aa4de7b210422}. It retains the upstream candidate-edge order, one Bernoulli logit per potential edge, sequential cycle rejection, majority-vote decision, raw binary-accuracy utility, and Adam update. The selected 1T1A graph has four potential edges: both directed inter-agent edges and one edge from each agent to the decision node. Single-node agents always receive the original MMLU question, matching the upstream MMLU execution path; inter-agent edges therefore primarily control scheduling and which answers reach the decision node.
+
+The adapter adds provider-independent response objects, deterministic seeding, immutable dataset snapshots, and structured JSONL/CSV logging. These additions measure behavior but do not enter the baseline reward. Provider failures, unparseable answers, and graphs without valid decision input are retained and scored incorrect.
 
 \subsection{Planned System Architecture}
 
