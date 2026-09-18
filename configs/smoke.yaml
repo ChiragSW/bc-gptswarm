@@ -1,0 +1,31 @@
+experiment:
+  name: phase3_smoke
+  methods: [direct, full, random, optimized]
+  seeds: [7]
+dataset:
+  dev_path: data/mmlu/dev_subset.jsonl
+  validation_path: data/mmlu/validation_subset.jsonl
+  eval_limit: 5
+  optimization_limit: 5
+model:
+  provider: mock
+  model: deterministic-mock-v1
+  temperature: 0.0
+  max_tokens: 4
+  seed: 20260918
+  timeout_seconds: 30
+  cache_enabled: true
+  cache_path: data/cache/smoke.sqlite3
+graph:
+  num_truthful_agents: 1
+  num_adversarial_agents: 1
+  initial_probability: 0.5
+  threshold: 0.5
+optimization:
+  iterations: 2
+  batch_size: 2
+  learning_rate: 0.1
+output:
+  raw_dir: results/raw
+  baseline_csv: results/smoke_results.csv
+  experiment_log: experiments/experiment_log.csv
