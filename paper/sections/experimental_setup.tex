@@ -27,3 +27,9 @@ Before real-model comparisons, the constrained optimizer is exercised with the d
 \subsection{Phase 6--7 Controlled Protocol}
 
 All real-model conditions use seeds 11, 22, and 33, 12 optimization iterations, batch size four, primal rate 0.1, and the same frozen data and model settings as Phase 4. BC-GPTSwarm uses dual rate 0.2 and initial dual value zero. Condition order rotates by seed. Phase 7 changes one factor at a time at the middle budget: raw utility, dual rates 0.05 and 0.50, or a 2T2A graph with 16 candidate edges. The analysis retains every run and reports sample standard deviations and exploratory 95\% Student-$t$ intervals.
+
+\subsection{Statistical Analysis}
+
+The focal Phase 9 contrast is original accuracy-only optimization versus middle-budget BC-GPTSwarm. The independent unit for learned-policy inference is the optimizer seed, yielding three paired observations. We report paired mean effects, sample standard deviations, exploratory 95\% Student-$t$ intervals with two degrees of freedom, Cohen's $d_z$, and exact two-sided sign-flip tests. With three pairs, the smallest attainable two-sided exact $p$-value is 0.25.
+
+As a secondary analysis, the 72 matched seed--question outcomes are evaluated with exact McNemar testing. Its risk-difference interval uses 20,000 fixed-seed bootstrap resamples of the 24 question clusters while retaining all three fitted policies. This item-level analysis does not treat the 72 outcomes as independent optimizer replications. The ablation matrix remains exploratory; because no confirmatory family was preregistered, we do not perform ablation-wide tests or apply a post-hoc multiplicity procedure.

@@ -2,7 +2,7 @@
 
 \subsection{Implementation Validation}
 
-Eleven offline tests pass: six baseline tests, four constrained-method tests, and one controlled-objective test. They cover deterministic edge order, stochastic DAG validity, answer parsing, dataset loading, finite gradients, feasible conditional sampling, threshold repair, dual projection, cost-sensitive policy behavior, and fixed-dual controls. Deterministic-mock and local-Ollama smoke tiers complete without structural failures. The Phase 5 mock smoke averages 117.6 tokens against its 130-token expected budget, but remains software validation rather than research evidence.
+Fourteen offline tests pass: six baseline tests, four constrained-method tests, one controlled-objective test, and three statistical-analysis tests. They cover deterministic edge order, stochastic DAG validity, answer parsing, dataset loading, finite gradients, feasible conditional sampling, threshold repair, dual projection, cost-sensitive policy behavior, fixed-dual controls, exact sign-flip resolution, paired intervals, and McNemar discordance handling. Deterministic-mock and local-Ollama smoke tiers complete without structural failures. The Phase 5 mock smoke averages 117.6 tokens against its 130-token expected budget, but remains software validation rather than research evidence.
 
 \subsection{Baseline Reproduction}
 
@@ -67,3 +67,11 @@ Across all 30 main and ablation runs, active-agent count correlates 0.424 with a
 Pairing original accuracy-only and middle-budget BC-GPTSwarm by seed and question gives 72 comparisons: both are correct in 15, both are wrong in 52, the baseline alone is correct in three, and BC-GPTSwarm alone is correct in two. The five disagreements span high-school computer science, global facts, high-school microeconomics, and electrical engineering. In the electrical-engineering baseline-only win, BC-GPTSwarm uses 306 tokens versus 148 for the baseline, showing that extra calls can hurt both cost and correctness.
 
 There are no provider errors, unparseable final answers, or disconnected graphs in Phases 6--7. The dominant failure mode is ordinary task error from the small local model. Feasibility conditioning removes structural failures but does not fix weak reasoning.
+
+\subsection{Statistical Analysis}
+
+\input{tables/statistical_results}
+
+Table~\ref{tab:statistical-results} quantifies the uncertainty in the focal comparison. Across seeds, the accuracy effect is $-1.39$ percentage points (95\% CI $[-13.34, 10.56]$, exact $p=1.000$). The token effect is $-14.4$ tokens per question, or $-5.75\%$ relative to the baseline mean, but its interval is $[-236.7, 207.8]$ and exact $p=0.750$. The latency interval is similarly broad. All seed-level intervals include zero; the standardized effects are small and unstable with three pairs.
+
+Middle-budget normalized violation is $+4.05\%$ (95\% CI $[-28.52, 36.62]$, exact $p=0.750$). Failure to reject zero violation is not evidence of equivalence or compliance: no equivalence margin was predeclared, and two of three seed means exceed the target. The secondary McNemar test gives $p=1.000$, a matched odds ratio of 0.667 with exact 95\% CI $[0.056, 5.820]$, and a question-cluster bootstrap risk-difference interval of $[-5.56, 2.78]$ percentage points. These results support no superiority claim and are too imprecise to establish that the methods are equivalent.
