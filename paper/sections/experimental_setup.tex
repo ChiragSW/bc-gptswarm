@@ -1,7 +1,11 @@
 \section{Experimental Setup}
 
-The minimum reproduction uses MMLU with truthful and adversarial input-output agents and a majority-vote decision node. It will compare direct answer, full connectivity, random connectivity, and learned connectivity on identical examples. The publication-era repository revision is \texttt{1e1e5899d51bde690672417cf92aa4de7b210422}.
+The minimum reproduction uses MMLU with truthful and adversarial input--output agents and a majority-vote decision node. The mandatory graph scale is one truthful and one adversarial agent (1T1A); three of each (3T3A) is preferred if calibration shows it is affordable. The publication-era repository revision is \texttt{1e1e5899d51bde690672417cf92aa4de7b210422}.
 
-The original MMLU setting uses 200 optimizer iterations, four sampled graphs per iteration, Adam with learning rate 0.1, and 153 validation questions. We will first run a five-example smoke test, measure current API usage, and then predeclare an affordable scale. Python, NumPy, and PyTorch seeds, model identifiers, prompts, raw responses, edge masks, token counts, latency, errors, and cost will be logged.
+The original MMLU setting uses 200 optimizer iterations, four sampled graphs per iteration, Adam with learning rate 0.1, and 153 validation questions. We will first run a five-example smoke test, measure current API usage and the valid minimum cost, and then predeclare an affordable scale. Python, NumPy, and PyTorch seeds, model identifiers, prompts, raw responses, edge masks, token counts, latency, errors, cost, constraint violation, and dual trajectories will be logged.
+
+The comparison includes direct answer, full connectivity, random connectivity with edge probability 0.5, accuracy-only GPTSwarm, GPTSwarm with a fixed token penalty, and BC-GPTSwarm at multiple feasible budgets. Candidate budget ratios are 0.50, 0.75, and 1.00 of a named reference execution, subject to smoke-test feasibility. Ratios and the reference will be frozen before main evaluation.
+
+Primary metrics are MMLU accuracy, mean total tokens, normalized violation $\mathrm{E}[C/B-1]$, absolute budget error, and compliance rate. Secondary metrics are input/output tokens, estimated dollar cost, latency, active nodes and edges, optimization time, and stability across seeds. Planned ablations compare a learned dual variable with a fixed penalty, measured-token cost with edge-count cost, budget levels, dual learning rates, graph scales, and centered versus raw utility.
 
 The 2024 model endpoints may not be available. Any replacement model will be pinned and described, and its results will be presented as a controlled behavioral reproduction rather than an exact numerical replication.

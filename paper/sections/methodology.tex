@@ -1,3 +1,37 @@
 \section{Proposed Methodology}
 
-The reproduction will retain GPTSwarm's accuracy-only edge objective as the baseline. \textbf{TODO: Phase 1 will select one small extension and define its objective, algorithm, and hyperparameters.} Candidate directions include adding a resource penalty, imposing an execution budget, or allowing confidence-based early exit. No proposed method has been implemented.
+\subsection{Budget-Constrained Objective}
+
+The reproduction retains GPTSwarm's accuracy-only edge objective as a baseline. BC-GPTSwarm preserves its edge distribution $D_{\theta}$ but constrains measured resource use. For input $x$, sampled feasible graph $G\sim D_{\theta}$, task utility $U(G,x)$, total-token cost $C(G,x)$, and target $B>0$, the proposed problem is
+\begin{align}
+    \max_{\theta}\quad & \mathrm{E}_{x,G}[U(G,x)] \\
+    \text{subject to}\quad & \mathrm{E}_{x,G}[C(G,x)] \leq B.
+\end{align}
+Using the normalized constraint $g=\mathrm{E}[C/B-1]\leq0$, its Lagrangian is
+\begin{align}
+ \mathcal{L}(\theta,\lambda)
+ &=\mathrm{E}_{x,G}\!\left[U(G,x)\right. \notag\\
+ &\left.\quad-\lambda\left(\frac{C(G,x)}{B}-1\right)\right],\\
+ \lambda&\geq0.
+\end{align}
+Normalization makes the dual scale comparable across budgets; it does not remove the need to predeclare optimizer settings.
+
+\subsection{Primal--Dual Update}
+
+For $M$ sampled executions, the planned edge-policy estimate is
+\begin{equation}
+ \widehat{\nabla_{\theta}\mathcal{L}}=
+ \frac{1}{M}\sum_{i=1}^{M}
+ \left[A_i-\lambda\left(\frac{C_i}{B}-1\right)\right]
+ \nabla_{\theta}\log p_{\theta}(G_i),
+\end{equation}
+where $A_i$ is a centered task-utility advantage. The dual variable follows projected dual descent, equivalently increasing its penalty when the observed constraint is violated:
+\begin{equation}
+ \lambda\leftarrow\left[\lambda+\eta_{\lambda}
+ \left(\frac{1}{M}\sum_{i=1}^{M}\frac{C_i}{B}-1\right)\right]_{+}.
+\end{equation}
+The primary cost $C$ is the sum of reported input and output tokens across model calls. Dollar cost and latency are recorded but excluded from the initial constraint to keep the intervention identifiable.
+
+\subsection{Feasibility and Fairness}
+
+A disconnected or zero-call graph is not a valid budget solution. A smoke test will estimate the minimum cost of a valid direct-answer path; lower budgets will be declared infeasible. Every sampled graph must retain an input-to-decision path. This feasibility rule, the candidate edges, and the optimization-call allowance will be identical for accuracy-only, fixed-penalty, and constrained methods. No proposed method has yet been implemented, and all quantitative claims remain pending experiment.

@@ -1,3 +1,10 @@
 \section{Related Work}
 
-GPTSwarm situates itself among structured prompting, tool-using agents, multi-agent collaboration, and automatic prompt or workflow optimization~\cite{pmlr-v235-zhuge24a}. The present Phase 0 document cites only the verified primary GPTSwarm publication. \textbf{TODO: In Phase 1, add verified primary sources on adaptive routing, cost-aware inference, early exit, graph sparsification, and multi-objective agent optimization.}
+\paragraph{Optimizable agent graphs.}
+GPTSwarm represents agents as computational graphs and optimizes stochastic inter-agent edges with policy gradients~\cite{pmlr-v235-zhuge24a}. G-Designer instead uses a graph-neural approach to construct task-adaptive communication topologies~\cite{zhang2024gdesigner}. MasRouter selects collaboration modes, roles, and language models through a learned routing controller~\cite{yue2025masrouter}. These adaptive systems are broader than the present work, which retains one GPTSwarm candidate graph and changes only its optimization criterion.
+
+\paragraph{Efficient multi-agent systems.}
+AgentPrune performs one-shot pruning of spatial and temporal communication~\cite{zhang2024agentprune}, while AgentDropout dynamically removes agents and communication during collaboration~\cite{wang2025agentdropout}. Optima combines task effectiveness, token efficiency, and communication quality in a generate--rank--select--train process~\cite{chen2024optima}. AgentSlimming proposes training-free workflow compression using node pruning and lower-cost model substitution~\cite{chen2026agentslimming}. These studies make a generic efficiency or sparsification claim insufficiently distinctive.
+
+\paragraph{Conditional collaboration.}
+Debate Only When Necessary triggers multi-agent debate from model confidence~\cite{eo2025debate}. Confidence and query-dependent routing can save computation, but they require calibration or an additional router. BC-GPTSwarm instead conditions optimization on directly observed token use and studies a task-level expected resource constraint. Its intended contribution is limited to explicit budget control within GPTSwarm; it does not claim priority over cost-aware routing, pruning, or multi-objective agent optimization.
