@@ -1,0 +1,25 @@
+{
+  "notes": [
+    "All intervals are exploratory Student-t intervals over three seeds.",
+    "Correlations are descriptive run-level associations, not causal estimates.",
+    "Latency includes provider inference and remains sensitive to local system load."
+  ],
+  "paired_original_vs_bc075": {
+    "baseline_wins": 3,
+    "both_correct": 15,
+    "both_wrong": 52,
+    "proposed_wins": 2
+  },
+  "pareto_conditions": [
+    "bc_dual_050",
+    "bc_raw_utility",
+    "bc_2t2a"
+  ],
+  "provider_or_graph_failures": 0,
+  "run_level_pearson_correlations": {
+    "active_agents_accuracy": 0.4241199362597842,
+    "active_edges_accuracy": 0.22423242032350238,
+    "latency_accuracy": 0.28682768138737075,
+    "tokens_accuracy": 0.4196583357209954
+  }
+}

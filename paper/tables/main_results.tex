@@ -1,0 +1,18 @@
+\begin{table*}[t]
+\centering
+\caption{Controlled local-model comparison (mean $\pm$ sample standard deviation over three seeds). The 95\% intervals are exploratory because $n=3$.}
+\label{tab:main-results}
+\small
+\begin{tabular}{lrrrrrr}
+\hline
+Condition & Accuracy & Tokens/query & Norm. viol. & Compliance & Agents & Opt. sec. \\
+\hline
+Original & 0.250 $\pm$ 0.110 & 251.1 $\pm$ 90.4 & +0.104 & 0.46 & 1.67 & 53.7 \\
+Feasible accuracy & 0.222 $\pm$ 0.105 & 239.6 $\pm$ 19.6 & +0.053 & 0.53 & 1.58 & 63.9 \\
+Fixed penalty & 0.208 $\pm$ 0.083 & 230.4 $\pm$ 21.3 & +0.013 & 0.54 & 1.54 & 744.0 \\
+BC 0.50 & 0.208 $\pm$ 0.110 & 232.3 $\pm$ 31.9 & +0.288 & 0.38 & 1.54 & 62.0 \\
+BC 0.75 & 0.236 $\pm$ 0.105 & 236.7 $\pm$ 29.8 & +0.040 & 0.50 & 1.58 & 63.5 \\
+BC 1.00 & 0.208 $\pm$ 0.083 & 238.9 $\pm$ 18.5 & -0.212 & 0.75 & 1.58 & 62.5 \\
+\hline
+\end{tabular}
+\end{table*}

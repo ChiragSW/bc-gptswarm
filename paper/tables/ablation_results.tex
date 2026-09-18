@@ -1,0 +1,20 @@
+\begin{table}[t]
+\centering
+\caption{Ablations at the middle budget (mean over three seeds).}
+\label{tab:ablation-results}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{llrrr}
+\hline
+Factor & Level & Acc. & Tokens & Viol. \\
+\hline
+Utility & centered & 0.236 & 236.7 & +0.040 \\
+Utility & raw & 0.250 & 232.4 & +0.022 \\
+Dual Rate & 0.05 & 0.222 & 233.6 & +0.027 \\
+Dual Rate & 0.20 & 0.236 & 236.7 & +0.040 \\
+Dual Rate & 0.50 & 0.222 & 229.6 & +0.009 \\
+Graph Scale & 1T1A & 0.236 & 236.7 & +0.040 \\
+Graph Scale & 2T2A & 0.278 & 419.5 & +0.844 \\
+\hline
+\end{tabular}
+\end{table}

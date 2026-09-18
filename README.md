@@ -53,6 +53,10 @@ Run the Phase 6 controlled comparison and Phase 7 additional ablations:
     python scripts/run_comparison.py --config configs/main_experiments.yaml
     python scripts/run_comparison.py --config configs/ablations.yaml
 
+Generate the Phase 8 summaries, tables, and vector figures:
+
+    python scripts/generate_study_artifacts.py
+
 Compile the paper:
 
     cd paper
