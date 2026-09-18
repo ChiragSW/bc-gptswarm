@@ -8,7 +8,7 @@ The graph contains one truthful and one adversarial input--output agent (1T1A) a
 
 \subsection{Comparators and Budgets}
 
-Phase 4 compares direct answer, full connectivity, random connectivity with edge probability 0.5, and accuracy-only optimized GPTSwarm. Phase 6 compares publication-style accuracy-only optimization, a feasibility-matched accuracy control, a fixed token penalty of 0.25, and BC-GPTSwarm at ratios 0.50, 0.75, and 1.00 of the Phase 4 full-graph mean of 303.3 tokens per question. Each operational target is at least 105\% of the measured truthful direct-path mean. The new direct floor is 171.8 tokens, so the low target becomes 180.4 rather than 151.6 tokens.
+The baseline reproduction compares direct answer, full connectivity, random connectivity with edge probability 0.5, and accuracy-only optimized GPTSwarm. The controlled study compares publication-style accuracy-only optimization, a feasibility-matched accuracy control, a fixed token penalty of 0.25, and BC-GPTSwarm at ratios 0.50, 0.75, and 1.00 of the baseline full-graph mean of 303.3 tokens per question. Each operational target is at least 105\% of the measured truthful direct-path mean. The new direct floor is 171.8 tokens, so the low target becomes 180.4 rather than 151.6 tokens.
 
 \subsection{Metrics and Ablations}
 
@@ -16,20 +16,20 @@ Primary metrics are MMLU accuracy, mean total tokens, normalized violation $\mat
 
 \subsection{Reproducibility Controls}
 
-The credential-free baseline uses \texttt{qwen2.5:0.5b} through Ollama 0.17.1 at temperature zero with a four-token output cap and model seed 20260918. It runs on Python 3.10.9 and CPU-only PyTorch 2.8.0 on a 16-logical-core Intel system with approximately 16.9~GB RAM. Experiment seeds are 11, 22, and 33. Phase 4 disables response caching because latency is measured. Every raw response, parsed answer, edge mask, token count, latency, failure, optimizer gradient, and learned probability is logged.
+The credential-free baseline uses \texttt{qwen2.5:0.5b} through Ollama 0.17.1 at temperature zero with a four-token output cap and model seed 20260918. It runs on Python 3.10.9 and CPU-only PyTorch 2.8.0 on a 16-logical-core Intel system with approximately 16.9~GB RAM. Experiment seeds are 11, 22, and 33. Response caching is disabled because latency is measured. Every raw response, parsed answer, edge mask, token count, latency, failure, optimizer gradient, and learned probability is logged.
 
 This local model is not numerically comparable to the original GPT-4 Turbo-era endpoint. Results are therefore a controlled behavioral reproduction. The complete deviation log, pinned dependencies, prompts, configurations, and commands are versioned with the code. Conditions run in direct, full, random, then optimized order; local warm-up therefore prevents a fair cross-method latency claim.
 
-\subsection{Phase 5 Software Sanity Tier}
+\subsection{Software Sanity Tier}
 
-Before real-model comparisons, the constrained optimizer is exercised with the deterministic mock provider on five development and five held-out examples. The software-only configuration uses 50 iterations, batch size 16, primal rate 0.1, dual rate 0.2, and initial dual value 1.0. The measured mean direct-path floor is 75.8 tokens and the smoke budget is 130 tokens per example. These settings were selected to expose gradient and constraint failures cheaply; they are not Phase 6 research hyperparameters, and mock accuracy is not interpreted.
+Before real-model comparisons, the constrained optimizer is exercised with the deterministic mock provider on five development and five held-out examples. The software-only configuration uses 50 iterations, batch size 16, primal rate 0.1, dual rate 0.2, and initial dual value 1.0. The measured mean direct-path floor is 75.8 tokens and the smoke budget is 130 tokens per example. These settings were selected to expose gradient and constraint failures cheaply; they are not real-model research hyperparameters, and mock accuracy is not interpreted.
 
-\subsection{Phase 6--7 Controlled Protocol}
+\subsection{Controlled Protocol}
 
-All real-model conditions use seeds 11, 22, and 33, 12 optimization iterations, batch size four, primal rate 0.1, and the same frozen data and model settings as Phase 4. BC-GPTSwarm uses dual rate 0.2 and initial dual value zero. Condition order rotates by seed. Phase 7 changes one factor at a time at the middle budget: raw utility, dual rates 0.05 and 0.50, or a 2T2A graph with 16 candidate edges. The analysis retains every run and reports sample standard deviations and exploratory 95\% Student-$t$ intervals.
+All real-model conditions use seeds 11, 22, and 33, 12 optimization iterations, batch size four, primal rate 0.1, and the same frozen data and model settings as the baseline reproduction. BC-GPTSwarm uses dual rate 0.2 and initial dual value zero. Condition order rotates by seed. Ablations change one factor at a time at the middle budget: raw utility, dual rates 0.05 and 0.50, or a 2T2A graph with 16 candidate edges. The analysis retains every run and reports sample standard deviations and exploratory 95\% Student-$t$ intervals.
 
 \subsection{Statistical Analysis}
 
-The focal Phase 9 contrast is original accuracy-only optimization versus middle-budget BC-GPTSwarm. The independent unit for learned-policy inference is the optimizer seed, yielding three paired observations. We report paired mean effects, sample standard deviations, exploratory 95\% Student-$t$ intervals with two degrees of freedom, Cohen's $d_z$, and exact two-sided sign-flip tests. With three pairs, the smallest attainable two-sided exact $p$-value is 0.25.
+The focal statistical contrast is original accuracy-only optimization versus middle-budget BC-GPTSwarm. The independent unit for learned-policy inference is the optimizer seed, yielding three paired observations. We report paired mean effects, sample standard deviations, exploratory 95\% Student-$t$ intervals with two degrees of freedom, Cohen's $d_z$, and exact two-sided sign-flip tests. With three pairs, the smallest attainable two-sided exact $p$-value is 0.25.
 
 As a secondary analysis, the 72 matched seed--question outcomes are evaluated with exact McNemar testing. Its risk-difference interval uses 20,000 fixed-seed bootstrap resamples of the 24 question clusters while retaining all three fitted policies. This item-level analysis does not treat the 72 outcomes as independent optimizer replications. The ablation matrix remains exploratory; because no confirmatory family was preregistered, we do not perform ablation-wide tests or apply a post-hoc multiplicity procedure.

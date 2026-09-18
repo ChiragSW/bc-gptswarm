@@ -71,7 +71,7 @@ def _write_latex_table(tests: pd.DataFrame, path: Path) -> None:
     lines = [
         r"\begin{table*}[t]",
         r"\centering",
-        r"\caption{Phase 9 focal statistical analysis. Effects are BC-GPTSwarm minus the original baseline; seed-level intervals are Student-$t$ intervals with two degrees of freedom.}",
+        r"\caption{Focal statistical analysis. Effects are BC-GPTSwarm minus the original baseline; seed-level intervals are Student-$t$ intervals with two degrees of freedom.}",
         r"\label{tab:statistical-results}",
         r"\small",
         r"\setlength{\tabcolsep}{4pt}",
