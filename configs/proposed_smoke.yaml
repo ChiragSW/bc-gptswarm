@@ -1,0 +1,38 @@
+experiment:
+  name: phase5_bc_smoke
+  methods: [budget_constrained]
+  seeds: [7]
+dataset:
+  dev_path: data/mmlu/dev_subset.jsonl
+  validation_path: data/mmlu/validation_subset.jsonl
+  eval_limit: 5
+  optimization_limit: 5
+model:
+  provider: mock
+  model: deterministic-mock-v1
+  temperature: 0.0
+  max_tokens: 4
+  seed: 20260918
+  timeout_seconds: 30
+  cache_enabled: false
+  cache_path: data/cache/proposed_smoke.sqlite3
+graph:
+  num_truthful_agents: 1
+  num_adversarial_agents: 1
+  initial_probability: 0.5
+  threshold: 0.5
+optimization:
+  iterations: 20
+  batch_size: 4
+  primal_learning_rate: 0.1
+  dual_learning_rate: 0.2
+  initial_dual_value: 0.0
+  center_utility: true
+constraint:
+  resource: total_tokens
+  budget_tokens: 110.0
+  feasibility_rule: at_least_one_decision_input
+output:
+  raw_dir: results/raw
+  proposed_csv: results/proposed_smoke_results.csv
+  experiment_log: experiments/experiment_log.csv

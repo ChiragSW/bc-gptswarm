@@ -15,6 +15,7 @@ from typing import Any
 import torch
 
 from .baseline import (
+    PROMPT_SPEC,
     UPSTREAM_COMMIT,
     evaluate_condition,
     make_distribution,
@@ -199,6 +200,7 @@ def run(config_path: str | Path) -> list[dict[str, Any]]:
                 "model": model_config,
                 "graph": graph_config,
                 "optimization": config["optimization"],
+                "prompts": PROMPT_SPEC,
             }
             raw_records = [manifest]
             raw_records.extend(

@@ -1,8 +1,10 @@
 # BC-GPTSwarm
 
-Reproducible research code for a minimal GPTSwarm MMLU baseline and the planned
-budget-constrained extension. Phases 3-4 implement and evaluate only the
-accuracy-only baseline. BC-GPTSwarm is not yet implemented.
+Reproducible research code for a minimal GPTSwarm MMLU baseline and its
+budget-constrained extension. Phases 3-4 implement and evaluate the
+accuracy-only baseline. Phase 5 implements BC-GPTSwarm and validates it with
+offline tests and a deterministic software smoke tier; main experiments remain
+pending.
 
 ## Baseline provenance
 
@@ -42,6 +44,10 @@ Run the real-model smoke tier and Phase 4 matrix:
     python scripts/run_baseline.py --config configs/baseline.yaml
     python scripts/generate_baseline_artifacts.py
 
+Run the credential-free Phase 5 constrained-optimizer smoke tier:
+
+    python scripts/run_proposed.py --config configs/proposed_smoke.yaml
+
 Compile the paper:
 
     cd paper
@@ -55,7 +61,7 @@ Compile the paper:
 - configs: versioned experiment settings
 - data/mmlu: committed dataset subsets and checksums
 - experiments: append-only experiment ledger
-- src/gptswarm_ext: baseline graph, provider, optimizer, and logging code
+- src/gptswarm_ext: baseline and constrained graph optimizers, providers, and logging
 - results/raw: per-example and per-optimization-step JSONL
 - results/processed: generated summaries
 - results/figures: generated vector figures
@@ -68,4 +74,5 @@ Compile the paper:
 The local 0.5B model is not numerically comparable to the paper's GPT-4 Turbo
 experiments. Results are labeled a small controlled behavioral reproduction.
 Failed or disconnected random graphs remain in the logs and count as incorrect.
-No result is removed based on outcome.
+No result is removed based on outcome. Phase 5 smoke scores validate software
+only and are not part of the research comparison.

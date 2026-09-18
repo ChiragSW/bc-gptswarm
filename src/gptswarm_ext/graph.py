@@ -104,6 +104,42 @@ class EdgeWiseDistribution(torch.nn.Module):
                 accepted.append(edge)
         return GraphSample(tuple(accepted), tuple(mask), torch.stack(log_probs).sum())
 
+    def sample_feasible(
+        self,
+        generator: torch.Generator,
+        max_attempts: int = 1_000,
+    ) -> GraphSample:
+        """Sample the Bernoulli DAG policy conditioned on a decision input.
+
+        Rejection sampling alone would draw the right conditional distribution,
+        but its uncorrected score function would omit the gradient of the
+        conditioning normalizer. Decision-node edges cannot create cycles, so
+        the feasibility probability is available in closed form.
+        """
+        decision_indices = [
+            index
+            for index, (_, target) in enumerate(self.potential_edges)
+            if target == DECISION_NODE
+        ]
+        if not decision_indices:
+            raise ValueError("No candidate edge reaches the decision node")
+        decision_probabilities = self.probabilities[decision_indices]
+        feasibility_probability = 1.0 - torch.prod(1.0 - decision_probabilities)
+        if not bool(feasibility_probability.detach() > 0.0):
+            raise RuntimeError("Feasible graph probability is zero")
+
+        for _ in range(max_attempts):
+            sample = self.sample(generator)
+            if sample.predecessors(DECISION_NODE):
+                return GraphSample(
+                    edges=sample.edges,
+                    mask=sample.mask,
+                    log_prob=sample.log_prob - torch.log(feasibility_probability),
+                )
+        raise RuntimeError(
+            f"Failed to sample a feasible graph in {max_attempts} attempts"
+        )
+
     def full(self) -> GraphSample:
         accepted: list[Edge] = []
         mask: list[bool] = []
@@ -130,6 +166,36 @@ class EdgeWiseDistribution(torch.nn.Module):
                 accepted.append(edge)
         return GraphSample(
             tuple(accepted),
+            tuple(mask),
+            torch.tensor(0.0, requires_grad=True),
+        )
+
+    def from_probabilities_feasible(self, threshold: float = 0.5) -> GraphSample:
+        """Threshold the policy while guaranteeing a valid decision input."""
+        sample = self.from_probabilities(threshold)
+        if sample.predecessors(DECISION_NODE):
+            return sample
+
+        decision_indices = [
+            index
+            for index, (_, target) in enumerate(self.potential_edges)
+            if target == DECISION_NODE
+        ]
+        if not decision_indices:
+            raise ValueError("No candidate edge reaches the decision node")
+        best_index = max(
+            decision_indices,
+            key=lambda index: float(self.probabilities[index].detach()),
+        )
+        edges = list(sample.edges)
+        edge = self.potential_edges[best_index]
+        if would_create_cycle(edges, edge):
+            raise RuntimeError("Decision-edge feasibility repair created a cycle")
+        edges.append(edge)
+        mask = list(sample.mask)
+        mask[best_index] = True
+        return GraphSample(
+            tuple(edges),
             tuple(mask),
             torch.tensor(0.0, requires_grad=True),
         )
