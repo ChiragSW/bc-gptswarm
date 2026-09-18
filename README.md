@@ -48,6 +48,11 @@ Run the credential-free Phase 5 constrained-optimizer smoke tier:
 
     python scripts/run_proposed.py --config configs/proposed_smoke.yaml
 
+Run the Phase 6 controlled comparison and Phase 7 additional ablations:
+
+    python scripts/run_comparison.py --config configs/main_experiments.yaml
+    python scripts/run_comparison.py --config configs/ablations.yaml
+
 Compile the paper:
 
     cd paper
@@ -63,7 +68,7 @@ Compile the paper:
 - experiments: append-only experiment ledger
 - src/gptswarm_ext: baseline and constrained graph optimizers, providers, and logging
 - results/raw: per-example and per-optimization-step JSONL
-- results/processed: generated summaries
+- results/processed: generated summaries and additional ablation runs
 - results/figures: generated vector figures
 - paper: live LaTeX manuscript
 - tests: offline baseline tests

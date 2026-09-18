@@ -1,0 +1,61 @@
+experiment:
+  name: phase6_main
+  study: main
+  methods: [controlled_comparison]
+  seeds: [11, 22, 33]
+dataset:
+  dev_path: data/mmlu/dev_subset.jsonl
+  validation_path: data/mmlu/validation_subset.jsonl
+  eval_limit: 24
+  optimization_limit: 24
+model:
+  provider: ollama
+  model: qwen2.5:0.5b
+  base_url: http://127.0.0.1:11434
+  temperature: 0.0
+  max_tokens: 4
+  seed: 20260918
+  timeout_seconds: 120
+  cache_enabled: false
+  cache_path: data/cache/phase6.sqlite3
+graph:
+  num_truthful_agents: 1
+  num_adversarial_agents: 1
+  initial_probability: 0.5
+  threshold: 0.5
+optimization:
+  iterations: 12
+  batch_size: 4
+  primal_learning_rate: 0.1
+  dual_learning_rate: 0.2
+  initial_dual_value: 0.0
+  center_utility: true
+resource:
+  reference_name: phase4_full_graph_mean
+  reference_tokens_per_example: 303.2916666667
+  direct_floor_margin: 1.05
+conditions:
+  - name: original_accuracy
+    objective: original_accuracy
+    budget_ratio: 0.75
+    center_utility: false
+  - name: feasible_accuracy
+    objective: accuracy
+    budget_ratio: 0.75
+  - name: fixed_penalty
+    objective: fixed_penalty
+    budget_ratio: 0.75
+    fixed_penalty: 0.25
+  - name: bc_budget_050
+    objective: constrained
+    budget_ratio: 0.50
+  - name: bc_budget_075
+    objective: constrained
+    budget_ratio: 0.75
+  - name: bc_budget_100
+    objective: constrained
+    budget_ratio: 1.00
+output:
+  raw_dir: results/raw
+  run_csv: results/main_results.csv
+  experiment_log: experiments/experiment_log.csv

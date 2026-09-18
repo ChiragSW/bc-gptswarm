@@ -1,0 +1,59 @@
+experiment:
+  name: phase7_ablation
+  study: ablation
+  methods: [controlled_ablation]
+  seeds: [11, 22, 33]
+dataset:
+  dev_path: data/mmlu/dev_subset.jsonl
+  validation_path: data/mmlu/validation_subset.jsonl
+  eval_limit: 24
+  optimization_limit: 24
+model:
+  provider: ollama
+  model: qwen2.5:0.5b
+  base_url: http://127.0.0.1:11434
+  temperature: 0.0
+  max_tokens: 4
+  seed: 20260918
+  timeout_seconds: 120
+  cache_enabled: false
+  cache_path: data/cache/phase7.sqlite3
+graph:
+  num_truthful_agents: 1
+  num_adversarial_agents: 1
+  initial_probability: 0.5
+  threshold: 0.5
+optimization:
+  iterations: 12
+  batch_size: 4
+  primal_learning_rate: 0.1
+  dual_learning_rate: 0.2
+  initial_dual_value: 0.0
+  center_utility: true
+resource:
+  reference_name: phase4_full_graph_mean
+  reference_tokens_per_example: 303.2916666667
+  direct_floor_margin: 1.05
+conditions:
+  - name: bc_raw_utility
+    objective: constrained
+    budget_ratio: 0.75
+    center_utility: false
+  - name: bc_dual_005
+    objective: constrained
+    budget_ratio: 0.75
+    dual_learning_rate: 0.05
+  - name: bc_dual_050
+    objective: constrained
+    budget_ratio: 0.75
+    dual_learning_rate: 0.50
+  - name: bc_2t2a
+    objective: constrained
+    budget_ratio: 0.75
+    graph:
+      num_truthful_agents: 2
+      num_adversarial_agents: 2
+output:
+  raw_dir: results/raw
+  run_csv: results/processed/phase7_additional_runs.csv
+  experiment_log: experiments/experiment_log.csv

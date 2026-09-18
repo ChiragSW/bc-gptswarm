@@ -42,7 +42,7 @@ def calibrate_direct_cost(traces: list[EvaluationTrace]) -> float:
     return float(np.mean([trace.total_tokens for trace in traces]))
 
 
-def optimize_budget_constrained(
+def optimize_graph_policy(
     distribution: EdgeWiseDistribution,
     examples: list[MMLUExample],
     provider: BaseProvider,
@@ -55,8 +55,10 @@ def optimize_budget_constrained(
     budget_tokens: float,
     initial_dual_value: float = 0.0,
     center_utility: bool = True,
+    objective: str = "constrained",
+    fixed_penalty: float = 0.0,
 ) -> tuple[list[dict[str, Any]], PrimalDualState]:
-    """Optimize expected accuracy subject to an expected token budget."""
+    """Optimize a feasible graph policy under one controlled objective."""
     if not examples:
         raise ValueError("At least one optimization example is required")
     if iterations <= 0 or batch_size <= 0:
@@ -67,6 +69,10 @@ def optimize_budget_constrained(
         raise ValueError("budget_tokens must be positive")
     if initial_dual_value < 0.0:
         raise ValueError("initial_dual_value must be non-negative")
+    if objective not in {"accuracy", "fixed_penalty", "constrained"}:
+        raise ValueError(f"Unsupported objective: {objective}")
+    if fixed_penalty < 0.0:
+        raise ValueError("fixed_penalty must be non-negative")
 
     optimizer = torch.optim.Adam(
         distribution.parameters(), lr=primal_learning_rate
@@ -76,7 +82,7 @@ def optimize_budget_constrained(
     permutation = torch.randperm(len(ordered), generator=generator).tolist()
     ordered = [ordered[index] for index in permutation]
     cursor = 0
-    dual_value = float(initial_dual_value)
+    dual_value = float(initial_dual_value) if objective == "constrained" else 0.0
     records: list[dict[str, Any]] = []
 
     for iteration in range(iterations):
@@ -105,7 +111,12 @@ def optimize_budget_constrained(
             [float(trace.total_tokens) for trace in traces], dtype=torch.float32
         )
         violations = costs / budget_tokens - 1.0
-        scores = advantages - dual_value * violations
+        if objective == "accuracy":
+            scores = advantages
+        elif objective == "fixed_penalty":
+            scores = advantages - fixed_penalty * (costs / budget_tokens)
+        else:
+            scores = advantages - dual_value * violations
         loss = torch.stack(
             [
                 -sample.log_prob * score.detach()
@@ -120,12 +131,13 @@ def optimize_budget_constrained(
 
         dual_before = dual_value
         mean_tokens = float(costs.mean())
-        dual_value = projected_dual_update(
-            dual_value,
-            mean_tokens,
-            budget_tokens,
-            dual_learning_rate,
-        )
+        if objective == "constrained":
+            dual_value = projected_dual_update(
+                dual_value,
+                mean_tokens,
+                budget_tokens,
+                dual_learning_rate,
+            )
         probabilities = distribution.probabilities.detach().tolist()
         for batch_index, (sample, trace) in enumerate(zip(samples, traces)):
             records.append(
@@ -144,10 +156,43 @@ def optimize_budget_constrained(
                     "dual_after": dual_value,
                     "batch_mean_tokens": mean_tokens,
                     "budget_tokens": budget_tokens,
+                    "objective": objective,
+                    "fixed_penalty": fixed_penalty,
                 }
             )
 
     return records, PrimalDualState(dual_value, budget_tokens)
+
+
+def optimize_budget_constrained(
+    distribution: EdgeWiseDistribution,
+    examples: list[MMLUExample],
+    provider: BaseProvider,
+    agent_ids: list[str],
+    seed: int,
+    iterations: int,
+    batch_size: int,
+    primal_learning_rate: float,
+    dual_learning_rate: float,
+    budget_tokens: float,
+    initial_dual_value: float = 0.0,
+    center_utility: bool = True,
+) -> tuple[list[dict[str, Any]], PrimalDualState]:
+    return optimize_graph_policy(
+        distribution=distribution,
+        examples=examples,
+        provider=provider,
+        agent_ids=agent_ids,
+        seed=seed,
+        iterations=iterations,
+        batch_size=batch_size,
+        primal_learning_rate=primal_learning_rate,
+        dual_learning_rate=dual_learning_rate,
+        budget_tokens=budget_tokens,
+        initial_dual_value=initial_dual_value,
+        center_utility=center_utility,
+        objective="constrained",
+    )
 
 
 def evaluate_feasible_policy(

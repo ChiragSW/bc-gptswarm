@@ -5,6 +5,7 @@ import torch
 from gptswarm_ext.baseline import make_distribution
 from gptswarm_ext.constrained import (
     optimize_budget_constrained,
+    optimize_graph_policy,
     projected_dual_update,
 )
 from gptswarm_ext.data import MMLUExample
@@ -80,3 +81,25 @@ def test_constrained_optimizer_has_finite_gradients_and_valid_trajectories():
     assert all(not record["trace"]["error"] for record in records)
     assert all(math.isfinite(value) for value in probabilities)
     assert probabilities[2] > probabilities[3]
+
+
+def test_control_objectives_keep_dual_fixed_at_zero():
+    for objective in ("accuracy", "fixed_penalty"):
+        agent_ids, distribution = make_distribution(1, 1, 0.5)
+        records, state = optimize_graph_policy(
+            distribution=distribution,
+            examples=[_example()],
+            provider=CostAwareProvider(),
+            agent_ids=agent_ids,
+            seed=5,
+            iterations=3,
+            batch_size=4,
+            primal_learning_rate=0.1,
+            dual_learning_rate=0.2,
+            budget_tokens=20.0,
+            initial_dual_value=2.0,
+            objective=objective,
+            fixed_penalty=0.25,
+        )
+        assert state.dual_value == 0.0
+        assert {record["objective"] for record in records} == {objective}
