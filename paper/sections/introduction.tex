@@ -1,0 +1,16 @@
+\section{Introduction}
+
+Large language models can be composed into agents that reason, call tools, and exchange intermediate outputs. Such systems are commonly implemented as hand-designed workflows, making it difficult to compare orchestration strategies or improve them automatically. GPTSwarm addresses this problem by representing an operation as a node, an agent as a directed graph of operations, and a swarm as a composite graph of agents~\cite{pmlr-v235-zhuge24a}.
+
+GPTSwarm optimizes inter-agent connectivity with policy gradients and improves node behavior through prompt-level updates. Its experiments establish that learned connectivity can suppress adversarial agents and recombine existing reasoning strategies. However, the optimization target is task utility alone even though different sampled graphs can require substantially different numbers of calls, tokens, and seconds.
+
+This project will reproduce the smallest scientifically useful part of GPTSwarm before evaluating a small extension. Phase 0 selects the adversarial MMLU edge-optimization experiment as the baseline because it exercises graph construction, message passing, DAG-constrained edge sampling, and REINFORCE without the tool complexity of GAIA or the large token demand of Mini Crosswords.
+
+The planned contributions are:
+\begin{itemize}
+    \item a transparent, versioned reproduction of GPTSwarm's core edge-optimization baseline;
+    \item a controlled evaluation protocol that records accuracy and resource usage for every graph execution; and
+    \item \textbf{TODO: a small extension selected and specified in Phase 1.}
+\end{itemize}
+
+No experimental improvement is claimed at this stage.

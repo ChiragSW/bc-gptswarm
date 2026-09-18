@@ -1,0 +1,7 @@
+\section{Experimental Setup}
+
+The minimum reproduction uses MMLU with truthful and adversarial input-output agents and a majority-vote decision node. It will compare direct answer, full connectivity, random connectivity, and learned connectivity on identical examples. The publication-era repository revision is \texttt{1e1e5899d51bde690672417cf92aa4de7b210422}.
+
+The original MMLU setting uses 200 optimizer iterations, four sampled graphs per iteration, Adam with learning rate 0.1, and 153 validation questions. We will first run a five-example smoke test, measure current API usage, and then predeclare an affordable scale. Python, NumPy, and PyTorch seeds, model identifiers, prompts, raw responses, edge masks, token counts, latency, errors, and cost will be logged.
+
+The 2024 model endpoints may not be available. Any replacement model will be pinned and described, and its results will be presented as a controlled behavioral reproduction rather than an exact numerical replication.

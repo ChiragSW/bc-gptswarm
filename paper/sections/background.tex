@@ -1,0 +1,35 @@
+\section{Background: GPTSwarm}
+
+\subsection{Agents as Graphs}
+
+GPTSwarm defines an agent as a directed acyclic graph
+\begin{equation}
+    G=(N,E,F,o),
+\end{equation}
+where $N$ is a set of computational nodes, $E\subset N\times N$ is a directed edge set, $F=\{f_n\}_{n\in N}$ assigns a routine to each node, and $o\in N$ is an output node~\cite{pmlr-v235-zhuge24a}. A node consumes the original input and available predecessor outputs, applies its routine, and sends a natural-language or structured result to its successors. Topological execution makes edges both communication channels and control dependencies.
+
+A swarm combines several agent graphs. Their internal edges remain fixed in the reported edge experiments, while additional edges between agents determine communication and orchestration. A task-specific decision node aggregates terminal information, for example by majority vote.
+
+\subsection{Edge Optimization}
+
+Let $\mathcal{E}=\{e_i\}_{i=1}^{d}$ be potential edges and let $D_{\theta}$ be a distribution over feasible DAGs. GPTSwarm optimizes
+\begin{equation}
+    \max_{\theta}\;\mathrm{E}_{G'\sim D_{\theta}}[u_{\tau}(G')],
+\end{equation}
+where $u_{\tau}$ is task utility. Each potential edge has a logit whose sigmoid is an inclusion probability. Edges are sampled sequentially and rejected when their addition would create a cycle.
+
+Because LLM calls and task metrics are non-differentiable, GPTSwarm uses REINFORCE:
+\begin{equation}
+ \nabla_{\theta}\mathrm{E}[u_{\tau}(G)] \approx
+ \frac{1}{M}\sum_{i=1}^{M}\hat{u}_{\tau}(G_i)
+ \nabla_{\theta}\log p_{\theta}(G_i).
+\end{equation}
+The experiments use Adam with task-specific learning rates.
+
+\subsection{Node Optimization}
+
+For prompt-parameterized routines $f_n^{p_n}$, GPTSwarm accumulates node-level execution histories and applies an improvement operator to the current prompt, the operation description, and observed examples. The concrete HumanEval optimizer updates demonstrations and prompts using recent program-test outcomes. Node optimization is part of the original system but is outside the minimum Phase 0 reproduction scope.
+
+\subsection{Published Evaluation}
+
+The original study evaluates edge optimization on MMLU and Mini Crosswords, node optimization on HumanEval, and framework composition on GAIA. The appendix reports token, monetary, and wall-clock resource requirements, but these quantities do not enter the published optimization objective.
