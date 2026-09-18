@@ -197,7 +197,7 @@ def run(config_path: str | Path) -> list[dict[str, Any]]:
             "evaluation_edges": json.dumps(
                 [sample.edges for sample in evaluation_graphs]
             ),
-            "raw_trace_path": str(raw_path.relative_to(project_path("."))),
+            "raw_trace_path": raw_path.relative_to(project_path(".")).as_posix(),
         }
         results.append(result)
         log_rows.append(

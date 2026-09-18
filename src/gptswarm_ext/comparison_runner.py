@@ -331,7 +331,7 @@ def run(config_path: str | Path) -> list[dict[str, Any]]:
                 "dual_final": state_dual,
                 "edge_probabilities": json.dumps(probabilities),
                 "evaluation_edges": json.dumps(evaluation_edges),
-                "raw_trace_path": str(raw_path.relative_to(project_path("."))),
+                "raw_trace_path": raw_path.relative_to(project_path(".")).as_posix(),
             }
             results.append(result)
             _write_csv(project_path(output["run_csv"]), RESULT_COLUMNS, results)

@@ -12,6 +12,7 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 T95_DF2 = 4.302652729
+PDF_METADATA = {"CreationDate": None, "ModDate": None}
 
 LABELS = {
     "original_accuracy": "Original",
@@ -64,6 +65,11 @@ def _load_records(path: Path, record_type: str) -> list[dict[str, Any]]:
             if record.get("record_type") == record_type:
                 records.append(record)
     return records
+
+
+def _result_path(value: object) -> Path:
+    """Resolve trace paths written on either Windows or POSIX."""
+    return ROOT / Path(str(value).replace("\\", "/"))
 
 
 def _write_main_table(summary: pd.DataFrame, path: Path) -> None:
@@ -225,11 +231,17 @@ def _paired_outcomes(main: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, int]]:
         ].iloc[0]
         baseline = {
             record["example_id"]: record
-            for record in _load_records(ROOT / baseline_row.raw_trace_path, "evaluation")
+            for record in _load_records(
+                _result_path(baseline_row.raw_trace_path),
+                "evaluation",
+            )
         }
         proposed = {
             record["example_id"]: record
-            for record in _load_records(ROOT / proposed_row.raw_trace_path, "evaluation")
+            for record in _load_records(
+                _result_path(proposed_row.raw_trace_path),
+                "evaluation",
+            )
         }
         for example_id in sorted(baseline):
             left = baseline[example_id]
@@ -269,7 +281,7 @@ def _optimization_stability(combined: pd.DataFrame) -> pd.DataFrame:
     rows = []
     constrained = combined[combined["objective"] == "constrained"]
     for run in constrained.itertuples(index=False):
-        records = _load_records(ROOT / run.raw_trace_path, "optimization")
+        records = _load_records(_result_path(run.raw_trace_path), "optimization")
         seen: set[int] = set()
         for record in records:
             iteration = int(record["iteration"])
@@ -331,7 +343,7 @@ def _make_figures(
     ax.grid(alpha=0.25)
     ax.legend(frameon=False, fontsize=7, ncol=2)
     fig.tight_layout()
-    fig.savefig(figures / "main_accuracy_tokens.pdf")
+    fig.savefig(figures / "main_accuracy_tokens.pdf", metadata=PDF_METADATA)
     plt.close(fig)
 
     fig, ax = plt.subplots(figsize=(4.6, 3.2))
@@ -352,7 +364,7 @@ def _make_figures(
     ax.grid(alpha=0.25)
     ax.legend(frameon=False, fontsize=7, ncol=2)
     fig.tight_layout()
-    fig.savefig(figures / "accuracy_latency.pdf")
+    fig.savefig(figures / "accuracy_latency.pdf", metadata=PDF_METADATA)
     plt.close(fig)
 
     budget = ablation_summary[ablation_summary["ablation_dimension"] == "budget ratio"].copy()
@@ -377,7 +389,7 @@ def _make_figures(
     axes[1].set_ylabel("Accuracy")
     axes[1].grid(alpha=0.25)
     fig.tight_layout()
-    fig.savefig(figures / "budget_response.pdf")
+    fig.savefig(figures / "budget_response.pdf", metadata=PDF_METADATA)
     plt.close(fig)
 
     graph = ablation_summary[ablation_summary["ablation_dimension"] == "graph scale"]
@@ -391,7 +403,7 @@ def _make_figures(
     axes[1].set_title("Agent count vs. cost")
     axes[1].legend(frameon=False)
     fig.tight_layout()
-    fig.savefig(figures / "graph_scale.pdf")
+    fig.savefig(figures / "graph_scale.pdf", metadata=PDF_METADATA)
     plt.close(fig)
 
     fig, axes = plt.subplots(1, 2, figsize=(7.0, 2.8))
@@ -412,7 +424,7 @@ def _make_figures(
     for ax in axes:
         ax.grid(alpha=0.25)
     fig.tight_layout()
-    fig.savefig(figures / "optimization_stability.pdf")
+    fig.savefig(figures / "optimization_stability.pdf", metadata=PDF_METADATA)
     plt.close(fig)
 
 

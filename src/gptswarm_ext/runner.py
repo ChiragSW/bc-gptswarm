@@ -233,7 +233,7 @@ def run(config_path: str | Path) -> list[dict[str, Any]]:
                 "failure_count": int(summary["failure_count"]),
                 "edge_probabilities": json.dumps(probabilities),
                 "selected_edges": json.dumps(selected_edges),
-                "raw_trace_path": str(raw_path.relative_to(project_path("."))),
+                "raw_trace_path": raw_path.relative_to(project_path(".")).as_posix(),
             }
             results.append(result)
             log_rows.append(

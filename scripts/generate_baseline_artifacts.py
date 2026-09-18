@@ -7,6 +7,7 @@ import pandas as pd
 
 
 ROOT = Path(__file__).resolve().parents[1]
+PDF_METADATA = {"CreationDate": None, "ModDate": None}
 
 
 def main() -> None:
@@ -75,7 +76,10 @@ def main() -> None:
     axis.grid(alpha=0.25)
     axis.legend(frameon=False, fontsize=8)
     figure.tight_layout()
-    figure.savefig(figures / "baseline_accuracy_tokens.pdf")
+    figure.savefig(
+        figures / "baseline_accuracy_tokens.pdf",
+        metadata=PDF_METADATA,
+    )
     plt.close(figure)
     print(summary.to_string(index=False))
 
