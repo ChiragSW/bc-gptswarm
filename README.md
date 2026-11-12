@@ -1,5 +1,13 @@
 # BC-GPTSwarm
 
+Submission deliverables:
+
+- [Five-page IEEE manuscript](paper/main_short.pdf) and [LaTeX source](paper/main_short.tex).
+- [Self-contained Overleaf upload ZIP](outputs/BC-GPTSwarm-overleaf.zip); select `main.tex` and pdfLaTeX after import.
+- [10-slide presentation](outputs/BC-GPTSwarm-research-presentation.pptx): slides 1–3 cover existing work and the problem; slides 4–10 cover the proposed extension.
+- [Matching 10-minute speaker script](outputs/BC-GPTSwarm-10-minute-script.md).
+- [Submission build instructions and scope](paper/README.md).
+
 BC-GPTSwarm is a reproducible, reduced GPTSwarm study that asks whether a stochastic language-agent graph can optimize task utility while satisfying an explicit expected-token budget. The repository contains the implementation, frozen data, complete raw traces, experiment ledger, generated analyses, and final paper.
 
 The study is complete. Its main result is negative but informative: middle-budget BC-GPTSwarm used 5.8% fewer tokens than the original accuracy-only baseline, but did not improve mean accuracy and remained 4.0% over its expected budget. Tight-budget convergence was not established under the fixed 12-iteration allowance.
