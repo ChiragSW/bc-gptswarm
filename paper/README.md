@@ -1,6 +1,6 @@
-﻿# Submission files
+# Submission files
 
-The five-page manuscript describes the completed **qwen2.5:0.5b / Ollama** study. It includes the references in its five-page limit and uses the IEEE conference layout already selected in `main_short.tex`. No separate shared Overleaf project or template URL was supplied during preparation.
+The five-page manuscript describes the completed **qwen2.5:0.5b / Ollama** study. It follows the supplied IEEE Signal Processing Letters Overleaf template: `\documentclass[journal]{IEEEtran}`, a journal author block, running headings, a single-paragraph abstract, alphabetical keywords and an initial drop capital. Pages 1-4 contain the manuscript; page 5 contains references only. Standard template margins and 10-point type are preserved.
 
 - `main_short.tex`: submission manuscript source.
 - `main_short.pdf`: compiled five-page manuscript.

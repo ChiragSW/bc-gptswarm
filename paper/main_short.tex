@@ -1,31 +1,32 @@
 % Condensed manuscript. All claims and results come from paper/main.pdf.
-\documentclass[conference,letterpaper]{IEEEtran}
+\documentclass[journal]{IEEEtran}
+\ifCLASSINFOpdf
+\else
+\usepackage[dvips]{graphicx}
+\fi
+\hyphenation{op-tical net-works semi-conduc-tor}
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{microtype}
 \usepackage{url}
 \title{BC-GPTSwarm: Budget-Constrained Edge Optimization for Language-Agent Graphs}
-\author{
-\IEEEauthorblockN{Chirag Wattamwar}
-\IEEEauthorblockA{202411029@iiitvadodara.ac.in}
-\and
-\IEEEauthorblockN{Kishan N Prasad}
-\IEEEauthorblockA{202411054@iiitvadodara.ac.in}
-\and
-\IEEEauthorblockN{Kapil Kumar}
-\IEEEauthorblockA{202411050@iiitvadodara.ac.in}
-}
+\author{Chirag Wattamwar, Kishan N Prasad, and Kapil Kumar%
+\thanks{Chirag Wattamwar, Kishan N Prasad, and Kapil Kumar can be contacted at 202411029@iiitvadodara.ac.in, 202411054@iiitvadodara.ac.in, and 202411050@iiitvadodara.ac.in, respectively.}}
 \begin{document}
+\markboth{BC-GPTSwarm: Budget-Constrained Language-Agent Graphs}
+{Wattamwar, Prasad, and Kumar: BC-GPTSwarm}
 \maketitle
 \begin{abstract}
-We implement BC-GPTSwarm, a modest primal--dual extension of GPTSwarm's language-agent edge optimizer for an explicit expected token budget. The method retains graph semantics and node roles while adding token telemetry, feasible-policy conditioning, corrected conditional gradients, and a learned non-negative multiplier. A reduced adversarial question-answering study uses a local half-billion-parameter model, one truthful and one adversarial agent, 24 held-out questions, and three seeds. The original accuracy-only baseline averages 0.250 accuracy and 251.1 tokens per question. Middle-budget BC-GPTSwarm averages 0.236 accuracy and 236.7 tokens: 5.8\% fewer tokens, but 4.0\% above target. The low target is missed by 28.8\%; only the high target has aggregate slack. An ablation with two truthful and two adversarial agents reaches 0.278 accuracy at 419.5 tokens. Broad uncertainty supports neither superiority nor equivalence. The contribution is an implemented constraint mechanism and a controlled diagnosis: feasibility conditioning works and dual pressure is observable, but tight-budget convergence is not established within twelve iterations.
+We extend a stochastic language-agent graph optimizer with an explicit expected-token constraint. The method retains graph semantics and node roles while adding token telemetry, feasible-policy conditioning, corrected conditional gradients, and a learned non-negative multiplier. A reduced adversarial question-answering study uses a local half-billion-parameter model, 24 held-out questions, and three optimizer seeds. The accuracy-only baseline averages 0.250 accuracy and 251.1 tokens per question. At the middle budget, the proposed method averages 0.236 accuracy and 236.7 tokens: 5.8\% fewer tokens, but 4.0\% above target. The low target is missed by 28.8\%; only the high target has aggregate slack. Broad uncertainty supports neither superiority nor equivalence. The contribution is an implemented resource-constraint mechanism and a controlled diagnosis: feasibility conditioning prevents invalid solutions and dual pressure is observable, but tight-budget convergence is not established within twelve iterations.
 \end{abstract}
 \begin{IEEEkeywords}
-language agents, graph optimization, token budgets, primal--dual learning
+graph optimization, language agents, primal--dual learning, token budgets
 \end{IEEEkeywords}
 
-\section{Introduction and Context}
-GPTSwarm models operations as nodes, agents as directed graphs, and a swarm as a composite graph of agents~\cite{pmlr-v235-zhuge24a}. It optimizes inter-agent connectivity with policy gradients and separately improves node behavior through prompt updates. Its reported edge objective maximizes task utility, although sampled graphs may require different numbers of calls and tokens. Resource requirements are reported but do not enter that objective.
+\IEEEpeerreviewmaketitle
+
+\section{Introduction}
+\IEEEPARstart{G}{PTSwarm} models operations as nodes, agents as directed graphs, and a swarm as a composite graph of agents~\cite{pmlr-v235-zhuge24a}. It optimizes inter-agent connectivity with policy gradients and separately improves node behavior through prompt updates. Its reported edge objective maximizes task utility, although sampled graphs may require different numbers of calls and tokens. Resource requirements are reported but do not enter that objective.
 
 We ask whether GPTSwarm's stochastic edge policy can satisfy an explicit expected token budget while retaining task accuracy. A constraint specifies a target in resource units and can be assessed by budget violation. Our contribution is a versioned reproduction of the core adversarial MMLU edge optimizer, a feasible primal--dual extension, and controlled comparisons against accuracy-only and fixed-penalty alternatives.
 
@@ -178,11 +179,11 @@ Dual rate 0.50 & 0.222 & 229.6 & $+0.009$\\
 \end{table}
 Raw utility matches the original mean accuracy, 0.250, with 232.4 tokens, but has accuracy SD 0.150. No tested dual rate has a stable accuracy advantage (Table~\ref{tab:ablation}). The 2T2A graph raises mean accuracy to 0.278 but costs 419.5 tokens and violates the middle target by 84.4\%. More agents increase both accuracy and resource use; this is not a useful constrained solution.
 
-Final mean $\lambda$ values at ratios 0.50/0.75/1.00 are 1.129/0.427/0.005: tighter budgets correctly induce larger penalties. However, final training-batch cost ratios remain 1.506/1.321/0.950. The intended dual response is observable, but twelve iterations do not establish low- or middle-budget convergence.
+Final mean $\lambda$ values at ratios 0.50/0.75/1.00 are 1.129/0.427/0.005: tighter budgets correctly induce larger penalties. However, final training-batch cost ratios remain 1.506/1.321/0.950. Dual pressure is observable, but neither tight target converges within twelve iterations.
 
 
 
-Fig.~\ref{fig:operating-points} shows why accuracy and cost must be interpreted jointly: differences in the observed mean operating points are accompanied by substantial seed variation. Main-condition accuracy standard deviations range from 0.083 to 0.110. Fig.~\ref{fig:stability} separates a mechanically correct dual response from convergence: increasing the multiplier does not by itself establish budget feasibility.
+Fig.~\ref{fig:operating-points} shows substantial seed variation; Fig.~\ref{fig:stability} distinguishes a responsive multiplier from demonstrated budget convergence.
 
 \subsection{Uncertainty and Paired Outcomes}
 
@@ -191,9 +192,7 @@ All focal seed-level confidence intervals include zero (Table~\ref{tab:stats}). 
 Of 72 paired seed--question outcomes, both methods are correct in fifteen, both wrong in fifty-two, the original alone correct in three, and BC-GPTSwarm alone correct in two. Exact McNemar $p=1.000$; the matched odds ratio is 0.667 (95\% exact confidence interval $[0.056,5.820]$). Thus feasible sampling removes structural failures, while ordinary task errors from the small model dominate. The secondary item-level analysis cannot replace independent optimizer replications.
 
 \section{Discussion and Limitations}
-The central result is negative but informative. BC-GPTSwarm makes expected resource constraints measurable, prevents invalid zero-call solutions, and exhibits dual pressure in the correct direction. The completed study does not support the performance hypothesis: mean accuracy falls at the middle target, low and middle expected budgets remain unmet, and uncertainty prevents superiority or equivalence claims.
-
-The controls separate these observations from a generic efficiency claim. Feasible accuracy-only optimization already reduces cost; a fixed penalty consumes slightly fewer tokens than default BC-GPTSwarm but has lower mean accuracy; raw utility gives a favorable mean point with larger variance. The larger graph improves mean accuracy at substantially greater cost. None provides a stable ranking under three seeds.
+The implemented mechanism prevents invalid zero-call solutions and produces dual pressure in the correct direction, but low and middle budgets remain unmet. Feasible accuracy-only optimization also reduces cost, so savings against the original do not isolate the dual mechanism. Fixed penalty and raw utility offer different mean tradeoffs; the larger graph increases both accuracy and cost. Three seeds establish no stable ranking.
 
 The evidence applies only to the declared reduced setting: a 0.5B model, 24 held-out questions, 1T1A graph, and twelve iterations. We cannot access the original 2024 endpoint, and we do not reproduce GPTSwarm's tool-use or node-optimization experiments. In the single-node MMLU path, all agents receive the question, limiting graph-dependent cooperation. Discrete graphs and binary rewards make primal--dual learning difficult, particularly with weak task performance.
 
@@ -204,10 +203,10 @@ Three independent seeds produce coarse exact tests and broad intervals. Question
 \section{Conclusion and Future Work}
 BC-GPTSwarm is an implemented feasible primal--dual extension of GPTSwarm for an explicit expected token budget. At the middle target, it uses 5.8\% fewer mean tokens than the original local baseline, but accuracy is 0.236 versus 0.250 and cost remains 4.0\% above target. The low target is also missed; only the high target has aggregate slack. The supported contribution is implementation and constraint diagnosis, not improved accuracy or established tight-budget control.
 
-Future work should predeclare a longer optimization allowance and evaluate a stronger model or a task with more graph-dependent cooperation. These would be new experiments, not post-hoc repairs to the current results. The present evidence identifies convergence as the unresolved bottleneck.
+Future experiments should predeclare longer optimization and evaluate a stronger model or more graph-dependent cooperation. The present evidence identifies convergence as the unresolved bottleneck.
 
-% Start the reference list in the next column to balance the final page.
-\newpage
+% The supplied template reserves page five for references only.
+\clearpage
 \bibliographystyle{IEEEtran}
 \bibliography{references}
 \end{document}
